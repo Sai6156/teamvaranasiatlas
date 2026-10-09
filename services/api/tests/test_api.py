@@ -7,7 +7,10 @@ client = TestClient(app)
 def test_private_endpoints_require_authentication():
     assert client.get("/workspaces").status_code == 401
     assert client.post("/workspaces", json={"name": "Acme"}).status_code == 401
-    assert client.get("/documents/00000000-0000-0000-0000-000000000001/source").status_code == 401
+    assert (
+        client.get("/documents/00000000-0000-0000-0000-000000000001/source").status_code
+        == 401
+    )
 
 
 def test_safe_health_and_file_capabilities():

@@ -1,36 +1,111 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let client: SupabaseClient | null = null;
-export const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-export const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+export const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+);
+export const apiBase = (
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
 export function supabase() {
-  if (!configured) throw new Error('Workspace authentication is being configured. Please try again shortly.');
-  if (!client) client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  if (!configured)
+    throw new Error(
+      "Workspace authentication is being configured. Please try again shortly.",
+    );
+  if (!client)
+    client = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      },
+    );
   return client;
 }
 export async function authHeaders() {
-  const {data, error} = await supabase().auth.getSession();
-  if (error || !data.session) throw new Error('Please sign in to continue.');
+  const { data, error } = await supabase().auth.getSession();
+  if (error || !data.session) throw new Error("Please sign in to continue.");
   let session = data.session;
   if ((session.expires_at || 0) * 1000 < Date.now() + 60000) {
     const refreshed = await supabase().auth.refreshSession();
-    if (refreshed.error || !refreshed.data.session) throw new Error('Your session expired. Please sign in again.');
+    if (refreshed.error || !refreshed.data.session)
+      throw new Error("Your session expired. Please sign in again.");
     session = refreshed.data.session;
   }
-  return {Authorization:`Bearer ${session.access_token}`};
+  return { Authorization: `Bearer ${session.access_token}` };
 }
-export async function api<T>(path:string, options:RequestInit = {}):Promise<T> {
+export async function api<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
   const headers = await authHeaders();
-  const result = await fetch(apiBase + path, {...options, headers:{...headers,...(options.body && !(options.body instanceof FormData) ? {'Content-Type':'application/json'} : {}), ...options.headers}});
+  const result = await fetch(apiBase + path, {
+    ...options,
+    headers: {
+      ...headers,
+      ...(options.body && !(options.body instanceof FormData)
+        ? { "Content-Type": "application/json" }
+        : {}),
+      ...options.headers,
+    },
+  });
   if (!result.ok) {
-    const error = await result.json().catch(()=>({detail:'Could not reach your workspace. Please retry.'}));
-    throw new Error(typeof error.detail==='string' ? error.detail : 'The request could not be completed.');
+    const error = await result
+      .json()
+      .catch(() => ({
+        detail: "Could not reach your workspace. Please retry.",
+      }));
+    throw new Error(
+      typeof error.detail === "string"
+        ? error.detail
+        : "The request could not be completed.",
+    );
   }
   return result.json();
 }
-export type Workspace = {id:string;name:string;role:'admin'|'employee'};
-export type CompanyDocument = {id:string;name:string;mime_type:string;size_bytes:number;collection:string;status:string;error_message?:string;chunk_count:number;extraction_note?:string;created_at:string};
-export type Citation = {id:string;number:number;document_id:string;document_name:string;content:string;location:{label:string;page?:number;kind?:string};collection:string};
-export type Message = {role:'user'|'assistant';content:string;citations?:Citation[];model?:string;error?:string};
-export type Conversation = {id:string;title:string;created_at:string};
-export type Member = {user_id:string;email:string;display_name:string;role:string;created_at:string};
+export type Workspace = {
+  id: string;
+  name: string;
+  role: "admin" | "employee";
+};
+export type CompanyDocument = {
+  id: string;
+  name: string;
+  mime_type: string;
+  size_bytes: number;
+  collection: string;
+  status: string;
+  error_message?: string;
+  chunk_count: number;
+  extraction_note?: string;
+  created_at: string;
+};
+export type Citation = {
+  id: string;
+  number: number;
+  document_id: string;
+  document_name: string;
+  content: string;
+  location: { label: string; page?: number; kind?: string };
+  collection: string;
+};
+export type Message = {
+  role: "user" | "assistant";
+  content: string;
+  citations?: Citation[];
+  model?: string;
+  error?: string;
+};
+export type Conversation = { id: string; title: string; created_at: string };
+export type Member = {
+  user_id: string;
+  email: string;
+  display_name: string;
+  role: string;
+  created_at: string;
+};
