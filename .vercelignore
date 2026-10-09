@@ -1,0 +1,14 @@
+secrets.env
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+**/.next
+.venv
+.runtime
+**/__pycache__
+.git
+**/*.tsbuildinfo
+test-results
+playwright-report

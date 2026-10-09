@@ -45,9 +45,9 @@ Use at least a 12-character password policy in Supabase Auth; enable compromised
 
 ## Supported formats and limits
 
-TXT, Markdown, logs, common programming/config files, JSON/YAML/TOML, SQL, HTML/XML, notebook source, PDF, DOCX, CSV/TSV, XLSX, PPTX, and common images. Linux deployment includes Tesseract and Poppler for OCR. PDF, paragraph, slide, row/sheet, and line references are preserved.
+TXT, Markdown, logs, common programming/config files, JSON/YAML/TOML, SQL, HTML/XML, notebook source, PDF, DOCX, CSV/TSV, XLSX, PPTX, common images, and bounded ZIP archives. Linux deployment includes Tesseract and Poppler for OCR. PDF, paragraph, slide, row/sheet, and line references are preserved. ZIP members retain their paths and source locations; unsupported members are explicitly skipped. Nested/encrypted archives, unsafe paths, symbolic links, and excessive expansion are rejected.
 
-Limits: 25 MB/file, 200 PDF pages, 40 scanned OCR pages, 100,000 spreadsheet/table rows, 2,000 chunks/file, 200 documents and 500 MB per workspace, and 200 questions/workspace/day. Uploaded archives, legacy Office formats, encrypted files, audio/video, executables, and arbitrary binary formats are not currently supported. Image-only content in Office documents is not OCR'd. XLSX uses saved values and does not recalculate formulas. RAG cannot provide exact totals over an entire spreadsheet from only retrieved row subsets; Atlas explicitly asks the model to disclose this limitation.
+Limits: 25 MB/file, 200 PDF pages, 40 scanned OCR pages, 100,000 spreadsheet/table rows, 2,000 chunks/file, 200 documents and 500 MB per workspace, and 200 questions/workspace/day. ZIP archives are limited to 100 files and 75 MB expanded content. Legacy Office formats, encrypted files, audio/video, executables, and arbitrary binary formats are not currently supported. Image-only content in Office documents is not OCR'd. XLSX uses saved values and does not recalculate formulas. RAG cannot provide exact totals over an entire spreadsheet from only retrieved row subsets; Atlas explicitly asks the model to disclose this limitation.
 
 ## AI routing
 
