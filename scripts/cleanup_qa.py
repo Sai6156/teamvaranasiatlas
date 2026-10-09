@@ -67,6 +67,8 @@ async def main():
                     params={"id": "eq." + org["id"]},
                 )
                 result.raise_for_status()
+        # Shared fixture workspaces must be removed before any referenced user.
+        for user in users:
             result = await client.delete(
                 base + "/auth/v1/admin/users/" + user["id"], headers=headers
             )
