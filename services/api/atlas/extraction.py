@@ -75,6 +75,22 @@ class Block:
     location: dict
 
 
+class BoundedBlocks(list):
+    """Stop expansion as content is accumulated, including repeated table headers."""
+
+    def __init__(self):
+        super().__init__()
+        self.characters = 0
+
+    def append(self, block: Block):
+        self.characters += len(block.text)
+        if self.characters > MAX_TEXT:
+            raise ValueError(
+                "The extracted content exceeds the processing limit. Split the file."
+            )
+        super().append(block)
+
+
 def decode(data: bytes) -> str:
     if b"\x00" in data[:4096] and not data.startswith((b"\xff\xfe", b"\xfe\xff")):
         raise ValueError(
@@ -121,7 +137,7 @@ def extract(data: bytes, name: str) -> tuple[list[Block], str | None]:
         raise ValueError(
             "Unsupported format. Upload PDF, Office documents, text, code, tables, or images."
         )
-    blocks: list[Block] = []
+    blocks: list[Block] = BoundedBlocks()
     note = None
     if suffix == ".zip":
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
