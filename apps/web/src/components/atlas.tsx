@@ -1209,17 +1209,6 @@ function WorkspaceApp({ session }: { session: Session }) {
               <small>
                 {workspace.role === "admin" ? "Workspace admin" : "Team member"}
               </small>
-              {doc.status === "extracting" && !!doc.total_pages && (
-                <small>
-                  Reading page {doc.processed_pages || 0} of {doc.total_pages}
-                </small>
-              )}
-              {doc.status === "embedding" && !!doc.index_total_chunks && (
-                <small>
-                  Indexing {doc.index_completed_chunks || 0} of{" "}
-                  {doc.index_total_chunks} passages
-                </small>
-              )}
             </span>
             <LogOut size={16} />
           </button>
@@ -2131,6 +2120,17 @@ function DocumentTable({
                 {size(doc.size_bytes)}
                 {doc.chunk_count > 0 ? ` · ${doc.chunk_count} passages` : ""}
               </small>
+              {doc.status === "extracting" && !!doc.total_pages && (
+                <small>
+                  Reading page {doc.processed_pages || 0} of {doc.total_pages}
+                </small>
+              )}
+              {doc.status === "embedding" && !!doc.index_total_chunks && (
+                <small>
+                  Indexing {doc.index_completed_chunks || 0} of{" "}
+                  {doc.index_total_chunks} passages
+                </small>
+              )}
               {doc.error_message && (
                 <small className="file-error">{doc.error_message}</small>
               )}
