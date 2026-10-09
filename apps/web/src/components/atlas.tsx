@@ -49,6 +49,8 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ChatComposer from "./chat-composer";
+import ChatHistory from "./chat-history";
 import {
   api,
   apiBase,
@@ -791,7 +793,14 @@ function WorkspaceApp({ session }: { session: Session }) {
   const [collection, setCollection] = useState("");
   const [toast, setToast] = useState("");
   const [members, setMembers] = useState<Member[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [focusPrompt, setFocusPrompt] = useState(0);
+  const [showLatest, setShowLatest] = useState(false);
   const abort = useRef<AbortController | null>(null);
+  const chatOperation = useRef(0);
+  const messagesViewport = useRef<HTMLDivElement>(null);
+  const followLatest = useRef(true);
   const end = useRef<HTMLDivElement | null>(null);
   const currentWorkspace = useRef<string | null>(null);
   useEffect(() => {
@@ -860,8 +869,20 @@ function WorkspaceApp({ session }: { session: Session }) {
     return () => clearInterval(timer);
   }, [workspace, documents, refreshDocuments]);
   useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const viewport = messagesViewport.current;
+    if (viewport && followLatest.current)
+      viewport.scrollTop = viewport.scrollHeight;
   }, [messages, status]);
+  useEffect(() => {
+    function key(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setHistoryOpen(true);
+      }
+    }
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, []);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 4000);
@@ -875,7 +896,12 @@ function WorkspaceApp({ session }: { session: Session }) {
     session.user.email?.split("@")[0] ||
     "there";
   function newChat() {
-    if (streaming) return;
+    chatOperation.current++;
+    abort.current?.abort();
+    setStreaming(false);
+    setHistoryLoading(false);
+    setStatus("");
+    followLatest.current = true;
     setMessages([]);
     setConversationId(null);
     setQuestion("");
@@ -884,14 +910,28 @@ function WorkspaceApp({ session }: { session: Session }) {
     setMenu(false);
   }
   async function loadConversation(id: string) {
-    if (streaming) return;
+    const operation = ++chatOperation.current;
+    abort.current?.abort();
+    setStreaming(false);
+    setHistoryLoading(true);
+    setView("ask");
+    setMenu(false);
+    setConversationId(id);
+    setMessages([]);
+    setQuestion("");
+    setStatus("");
+    followLatest.current = true;
     try {
-      setMessages(await api<Message[]>(`/conversations/${id}/messages`));
+      const loaded = await api<Message[]>(`/conversations/${id}/messages`);
+      if (operation !== chatOperation.current) return;
+      setMessages(loaded);
       setConversationId(id);
       setView("ask");
       setMenu(false);
     } catch (error) {
-      setError(errorText(error));
+      if (operation === chatOperation.current) setError(errorText(error));
+    } finally {
+      if (operation === chatOperation.current) setHistoryLoading(false);
     }
   }
   async function ask(value = question) {
@@ -900,6 +940,9 @@ function WorkspaceApp({ session }: { session: Session }) {
     setView("ask");
     setQuestion("");
     setStreaming(true);
+    const operation = ++chatOperation.current;
+    followLatest.current = true;
+    setShowLatest(false);
     setStatus("Connecting to your knowledge");
     setCitation(null);
     setMessages((previous) => [
@@ -939,6 +982,10 @@ function WorkspaceApp({ session }: { session: Session }) {
       let buffer = "";
       while (true) {
         const { done, value: chunk } = await reader.read();
+        if (operation !== chatOperation.current) {
+          await reader.cancel();
+          return;
+        }
         if (done) break;
         buffer += decoder.decode(chunk, { stream: true });
         let boundary;
@@ -989,6 +1036,7 @@ function WorkspaceApp({ session }: { session: Session }) {
         );
       await refreshConversations();
     } catch (error) {
+      if (operation !== chatOperation.current) return;
       const message = controller.signal.aborted
         ? "Answer stopped. This partial response has not been verified."
         : errorText(error);
@@ -998,9 +1046,11 @@ function WorkspaceApp({ session }: { session: Session }) {
         ),
       );
     } finally {
-      setStreaming(false);
-      setStatus("");
-      abort.current = null;
+      if (operation === chatOperation.current) {
+        setStreaming(false);
+        setStatus("");
+        abort.current = null;
+      }
     }
   }
   async function signOut() {
@@ -1101,21 +1151,26 @@ function WorkspaceApp({ session }: { session: Session }) {
         </nav>
         <div className="sidebar-section-heading">
           <span>RECENT CONVERSATIONS</span>
-          <button
-            title="New conversation"
-            onClick={newChat}
-            disabled={streaming}
-          >
+          <button title="New conversation" onClick={newChat}>
             <Plus size={16} />
           </button>
         </div>
+        <button
+          className="sidebar-history-search"
+          onClick={() => setHistoryOpen(true)}
+        >
+          <Search size={15} />
+          <span>Search all chats</span>
+          <kbd>Ctrl K</kbd>
+        </button>
         <div className="recent-conversations">
           {conversations.length ? (
-            conversations.slice(0, 8).map((c) => (
+            conversations.map((c) => (
               <button
                 key={c.id}
                 onClick={() => loadConversation(c.id)}
                 className={conversationId === c.id ? "selected" : ""}
+                title={c.title}
               >
                 <MessageSquare size={14} />
                 <span>{c.title}</span>
@@ -1129,6 +1184,15 @@ function WorkspaceApp({ session }: { session: Session }) {
             </p>
           )}
         </div>
+        {!!conversations.length && (
+          <button
+            className="all-chats-link"
+            onClick={() => setHistoryOpen(true)}
+          >
+            View all conversations
+            <ChevronRight size={13} />
+          </button>
+        )}
         <div className="sidebar-bottom">
           <div className="private-workspace">
             <ShieldCheck size={18} />
@@ -1145,6 +1209,17 @@ function WorkspaceApp({ session }: { session: Session }) {
               <small>
                 {workspace.role === "admin" ? "Workspace admin" : "Team member"}
               </small>
+              {doc.status === "extracting" && !!doc.total_pages && (
+                <small>
+                  Reading page {doc.processed_pages || 0} of {doc.total_pages}
+                </small>
+              )}
+              {doc.status === "embedding" && !!doc.index_total_chunks && (
+                <small>
+                  Indexing {doc.index_completed_chunks || 0} of{" "}
+                  {doc.index_total_chunks} passages
+                </small>
+              )}
             </span>
             <LogOut size={16} />
           </button>
@@ -1239,7 +1314,7 @@ function WorkspaceApp({ session }: { session: Session }) {
                     placeholder="Ask anything about your company…"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    maxLength={4000}
+                    maxLength={20000}
                   />
                   <button
                     type="submit"
@@ -1528,8 +1603,29 @@ function WorkspaceApp({ session }: { session: Session }) {
                   New conversation
                 </button>
               </div>
-              <div className="chat-messages">
-                {!messages.length && (
+              <div
+                className="chat-messages"
+                ref={messagesViewport}
+                onScroll={() => {
+                  const element = messagesViewport.current;
+                  if (element) {
+                    const nearBottom =
+                      element.scrollHeight -
+                        element.scrollTop -
+                        element.clientHeight <
+                      80;
+                    followLatest.current = nearBottom;
+                    setShowLatest(!nearBottom);
+                  }
+                }}
+              >
+                {historyLoading && (
+                  <div className="history-loading">
+                    <Loader2 className="spin" size={18} />
+                    Opening conversation…
+                  </div>
+                )}
+                {!messages.length && !historyLoading && (
                   <div className="chat-empty">
                     <span className="chat-empty-logo">
                       <Sparkles size={32} />
@@ -1637,6 +1733,32 @@ function WorkspaceApp({ session }: { session: Session }) {
                           </div>
                         </div>
                       )}
+                      {message.role === "user" && (
+                        <div className="answer-actions">
+                          <button
+                            onClick={() =>
+                              navigator.clipboard
+                                .writeText(message.content)
+                                .then(() => setToast("Prompt copied."))
+                                .catch(() =>
+                                  setToast("Select the prompt to copy it."),
+                                )
+                            }
+                          >
+                            <Copy size={13} />
+                            Copy prompt
+                          </button>
+                          <button
+                            onClick={() => {
+                              setQuestion(message.content);
+                              setFocusPrompt((value) => value + 1);
+                            }}
+                          >
+                            <Settings size={13} />
+                            Edit & resend
+                          </button>
+                        </div>
+                      )}
                       {message.role === "assistant" &&
                         message.content &&
                         !(streaming && index === messages.length - 1) && (
@@ -1669,6 +1791,25 @@ function WorkspaceApp({ session }: { session: Session }) {
                 ))}
                 <div ref={end} />
               </div>
+              {showLatest && (
+                <button
+                  className="jump-latest"
+                  onClick={() => {
+                    const element = messagesViewport.current;
+                    if (element) {
+                      followLatest.current = true;
+                      element.scrollTo({
+                        top: element.scrollHeight,
+                        behavior: "smooth",
+                      });
+                      setShowLatest(false);
+                    }
+                  }}
+                >
+                  <ArrowUp size={14} />
+                  Jump to latest
+                </button>
+              )}
               <div className="chat-composer-wrap">
                 <div className="composer-scope">
                   <Folder size={13} />
@@ -1685,46 +1826,17 @@ function WorkspaceApp({ session }: { session: Session }) {
                   </select>
                   <span>{ready.length} ready documents</span>
                 </div>
-                <form
-                  className="chat-composer"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    ask();
+                <ChatComposer
+                  value={question}
+                  onChange={setQuestion}
+                  onSend={() => {
+                    void ask();
                   }}
-                >
-                  <textarea
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        ask();
-                      }
-                    }}
-                    aria-label="Your question"
-                    placeholder="Ask a question. Find a little clarity."
-                    rows={2}
-                    maxLength={4000}
-                  />
-                  {streaming ? (
-                    <button
-                      type="button"
-                      className="stop-button"
-                      onClick={() => abort.current?.abort()}
-                      aria-label="Stop answer"
-                    >
-                      <Square size={17} />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={!question.trim()}
-                      aria-label="Send question"
-                    >
-                      <ArrowUp size={20} />
-                    </button>
-                  )}
-                </form>
+                  busy={streaming}
+                  onStop={() => abort.current?.abort()}
+                  onNotice={setToast}
+                  focusSignal={focusPrompt}
+                />
                 <div className="composer-note">
                   <ShieldCheck size={12} />
                   Answers are based on your files. Check the evidence for
@@ -1760,6 +1872,16 @@ function WorkspaceApp({ session }: { session: Session }) {
           <CheckCircle2 size={17} />
           {toast}
         </div>
+      )}
+      {historyOpen && (
+        <ChatHistory
+          workspaceId={workspace.id}
+          selected={conversationId}
+          onSelect={(id) => {
+            void loadConversation(id);
+          }}
+          onClose={() => setHistoryOpen(false)}
+        />
       )}
       {uploadOpen && (
         <UploadModal

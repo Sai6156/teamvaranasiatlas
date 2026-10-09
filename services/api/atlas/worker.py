@@ -61,22 +61,51 @@ async def process(db: Database, job: dict):
         await db.update("ingestion_jobs", {"status": "done"}, id="eq." + job["id"])
         return
     lease_task = asyncio.create_task(heartbeat(db, job))
+    progress = [0, 0]
+
+    async def report_progress():
+        while True:
+            await asyncio.sleep(5)
+            if progress[1]:
+                await db.update(
+                    "documents",
+                    {"processed_pages": progress[0], "total_pages": progress[1]},
+                    id="eq." + document["id"],
+                    status="eq.extracting",
+                )
+
+    progress_task = asyncio.create_task(report_progress())
     try:
-        async with asyncio.timeout(300):
+        async with asyncio.timeout(settings().ingestion_timeout_seconds):
             filters = {
                 "id": "eq." + document["id"],
                 "status": "neq.deleted",
                 "organization_id": "eq." + document["organization_id"],
             }
-            await db.update("documents", {"status": "extracting"}, **filters)
+            await db.update(
+                "documents",
+                {"status": "extracting", "error_message": None, "processed_pages": 0},
+                **filters,
+            )
             result = await db.request(
                 "GET",
                 "/storage/v1/object/company-documents/" + document["storage_path"],
             )
             blocks, note = await asyncio.to_thread(
-                extract, result.content, document["name"]
+                extract,
+                result.content,
+                document["name"],
+                lambda done, total: progress.__setitem__(slice(None), [done, total]),
             )
-            await db.update("documents", {"status": "chunking"}, **filters)
+            await db.update(
+                "documents",
+                {
+                    "status": "chunking",
+                    "processed_pages": progress[0],
+                    "total_pages": progress[1],
+                },
+                **filters,
+            )
             chunks = chunk_blocks(blocks)
             if len(chunks) > settings().max_chunks:
                 raise ValueError(
@@ -87,7 +116,15 @@ async def process(db: Database, job: dict):
                 document_id="eq." + document["id"],
                 organization_id="eq." + document["organization_id"],
             )
-            await db.update("documents", {"status": "embedding"}, **filters)
+            await db.update(
+                "documents",
+                {
+                    "status": "embedding",
+                    "index_total_chunks": len(chunks),
+                    "index_completed_chunks": 0,
+                },
+                **filters,
+            )
             for start in range(0, len(chunks), 32):
                 if lease_task.done():
                     lease_task.result()
@@ -101,7 +138,9 @@ async def process(db: Database, job: dict):
                     )
                     return
                 batch = chunks[start : start + 32]
-                vectors = await embed([chunk.text for chunk in batch])
+                vectors = await embed(
+                    [f"Document: {document['name']}\n{chunk.text}" for chunk in batch]
+                )
                 await db.insert(
                     "chunks",
                     [
@@ -118,6 +157,20 @@ async def process(db: Database, job: dict):
                     ],
                     upsert=True,
                 )
+                await db.update(
+                    "documents",
+                    {"index_completed_chunks": min(start + 32, len(chunks))},
+                    **filters,
+                )
+            await db.update(
+                "documents",
+                {
+                    "indexing_version": "pdf-v2"
+                    if document["name"].lower().endswith(".pdf")
+                    else "v2"
+                },
+                **filters,
+            )
             published = await db.rpc(
                 "publish_document",
                 {
@@ -166,7 +219,9 @@ async def process(db: Database, job: dict):
         logger.warning("job=%s failed type=%s", job["id"], type(error).__name__)
     finally:
         lease_task.cancel()
+        progress_task.cancel()
         await asyncio.gather(lease_task, return_exceptions=True)
+        await asyncio.gather(progress_task, return_exceptions=True)
 
 
 async def main():

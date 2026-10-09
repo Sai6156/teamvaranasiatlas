@@ -55,11 +55,9 @@ export async function api<T>(
     },
   });
   if (!result.ok) {
-    const error = await result
-      .json()
-      .catch(() => ({
-        detail: "Could not reach your workspace. Please retry.",
-      }));
+    const error = await result.json().catch(() => ({
+      detail: "Could not reach your workspace. Please retry.",
+    }));
     throw new Error(
       typeof error.detail === "string"
         ? error.detail
@@ -82,6 +80,11 @@ export type CompanyDocument = {
   status: string;
   error_message?: string;
   chunk_count: number;
+  total_pages?: number;
+  processed_pages?: number;
+  index_total_chunks?: number;
+  index_completed_chunks?: number;
+  indexing_version?: string;
   extraction_note?: string;
   created_at: string;
 };
@@ -101,7 +104,12 @@ export type Message = {
   model?: string;
   error?: string;
 };
-export type Conversation = { id: string; title: string; created_at: string };
+export type Conversation = {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at?: string;
+};
 export type Member = {
   user_id: string;
   email: string;

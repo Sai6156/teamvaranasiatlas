@@ -93,11 +93,17 @@ async def embed(texts: list[str]) -> list[list[float]]:
     raise ModelUnavailable("Embedding service is busy. Please try again shortly.")
 
 
-def model_payload(model: str, providers: list[str], messages: list[dict], stream: bool):
+def model_payload(
+    model: str,
+    providers: list[str],
+    messages: list[dict],
+    stream: bool,
+    max_tokens: int = 1400,
+):
     payload = {
         "model": model,
         "messages": messages,
-        "max_tokens": 1400,
+        "max_tokens": max_tokens,
         "stream": stream,
         "provider": provider_policy(providers),
     }
@@ -110,9 +116,11 @@ def model_payload(model: str, providers: list[str], messages: list[dict], stream
     return payload
 
 
-async def generate(messages: list[dict]):
+async def generate(
+    messages: list[dict], max_tokens: int = 1400, timeout_seconds: int = 60
+):
     """One provider policy per model. Never merge partial outputs across attempts."""
-    deadline = time.monotonic() + 60
+    deadline = time.monotonic() + timeout_seconds
     attempts = [
         ROUTES[0],
         ROUTES[1],
@@ -130,14 +138,16 @@ async def generate(messages: list[dict]):
         emitted = False
         finished = False
         try:
-            timeout = httpx.Timeout(min(18, remaining), connect=5)
+            timeout = httpx.Timeout(min(35, remaining), connect=5)
             async with asyncio.timeout(remaining):
                 async with httpx.AsyncClient(timeout=timeout) as client:
                     async with client.stream(
                         "POST",
                         BASE + "/chat/completions",
                         headers=headers(),
-                        json=model_payload(model, providers, messages, True),
+                        json=model_payload(
+                            model, providers, messages, True, max_tokens
+                        ),
                     ) as response:
                         if response.status_code in (401, 402):
                             raise ConfigurationError(

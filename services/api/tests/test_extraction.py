@@ -104,7 +104,7 @@ def test_pdf_extraction_keeps_page_citations():
     blocks, note = extract(sample_pdf(), "travel.pdf")
     assert "14 days" in blocks[0].text
     assert blocks[0].location["page"] == 1
-    assert note is None
+    assert "All 1 PDF pages read" in note
 
 
 def test_zip_keeps_member_locations_without_extracting_to_disk():

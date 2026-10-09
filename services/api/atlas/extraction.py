@@ -4,8 +4,6 @@ import csv
 import io
 import json
 import shutil
-import subprocess
-import tempfile
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -131,7 +129,7 @@ def ocr_image(data: bytes) -> str:
         return pytesseract.image_to_string(image, timeout=30)
 
 
-def extract(data: bytes, name: str) -> tuple[list[Block], str | None]:
+def extract(data: bytes, name: str, progress=None) -> tuple[list[Block], str | None]:
     suffix = Path(name).suffix.lower()
     if suffix not in SUPPORTED_EXTENSIONS:
         raise ValueError(
@@ -189,68 +187,9 @@ def extract(data: bytes, name: str) -> tuple[list[Block], str | None]:
             if skipped:
                 note += f" {skipped} unsupported files were skipped."
     elif suffix == ".pdf":
-        from pypdf import PdfReader
+        from .pdf_extract import extract_pdf
 
-        reader = PdfReader(io.BytesIO(data))
-        if reader.is_encrypted:
-            raise ValueError(
-                "Encrypted PDFs are not supported. Upload a decrypted copy."
-            )
-        if len(reader.pages) > 200:
-            raise ValueError("PDFs are limited to 200 pages per upload.")
-        scanned = []
-        for index, page in enumerate(reader.pages):
-            text = page.extract_text(extraction_mode="layout") or ""
-            if len(text.strip()) < 30:
-                scanned.append(index)
-            blocks.append(
-                Block(
-                    text,
-                    {"kind": "page", "page": index + 1, "label": f"Page {index + 1}"},
-                )
-            )
-        if scanned:
-            if len(scanned) > 40:
-                raise ValueError(
-                    "Scanned PDFs are limited to 40 OCR pages. Split the document first."
-                )
-            if not shutil.which("pdftoppm") or not shutil.which("tesseract"):
-                raise ValueError(
-                    "This PDF requires OCR, which is unavailable on this server."
-                )
-            with tempfile.TemporaryDirectory() as directory:
-                source = Path(directory) / "source.pdf"
-                source.write_bytes(data)
-                for index in scanned:
-                    dest = Path(directory) / f"page-{index}"
-                    subprocess.run(
-                        [
-                            "pdftoppm",
-                            "-f",
-                            str(index + 1),
-                            "-l",
-                            str(index + 1),
-                            "-scale-to",
-                            "2000",
-                            "-singlefile",
-                            "-png",
-                            str(source),
-                            str(dest),
-                        ],
-                        check=True,
-                        timeout=40,
-                        capture_output=True,
-                    )
-                    blocks[index] = Block(
-                        ocr_image(dest.with_suffix(".png").read_bytes()),
-                        {
-                            "kind": "page",
-                            "page": index + 1,
-                            "ocr": True,
-                            "label": f"Page {index + 1} · OCR",
-                        },
-                    )
-            note = "Some pages were read using OCR; verify important numbers against the original."
+        return extract_pdf(data, progress)
     elif suffix in {".docx", ".xlsx", ".pptx"}:
         validate_office(data)
         if suffix == ".docx":
@@ -452,6 +391,28 @@ def chunk_blocks(
     chunks = []
     for block in blocks:
         text = block.text.rstrip()
+        if block.location.get("kind") == "table":
+            # Tables keep all column labels and aligned values together. Long
+            # tables repeat their header context in each bounded row group.
+            if len(text) <= 14000:
+                chunks.append(block)
+                continue
+            prefix = block.location.get("table_header", "")
+            rows = text[len(prefix) :].splitlines()
+            current = []
+            length = len(prefix)
+            for row in rows:
+                if current and length + len(row) > 14000:
+                    chunks.append(
+                        Block(prefix + "\n".join(current), dict(block.location))
+                    )
+                    current = []
+                    length = len(prefix)
+                current.append(row)
+                length += len(row) + 1
+            if current:
+                chunks.append(Block(prefix + "\n".join(current), dict(block.location)))
+            continue
         start = 0
         while start < len(text):
             end = min(start + max_chars, len(text))

@@ -1469,10 +1469,9 @@ label > select {
 .table-heading,
 .document-row {
   display: grid;
-  grid-template-columns: minmax(160px, 2.5fr) minmax(90px, 1.1fr) minmax(
-      95px,
-      1fr
-    ) 54px 65px;
+  grid-template-columns:
+    minmax(160px, 2.5fr) minmax(90px, 1.1fr) minmax(95px, 1fr)
+    54px 65px;
   gap: 15px;
   align-items: center;
   padding: 0 18px;
@@ -3353,78 +3352,582 @@ label > select {
   }
 }
 /* Keep application controls readable on presentation screens and phones. */
-.app-nav button { font-size: 13px; }
-.sidebar-caption, .sidebar-section-heading { font-size: 9px; }
-.workspace-switch select { font-size: 12px; }
-.recent-conversations > button { font-size: 12px; }
-.recent-conversations > p { font-size: 11px; }
-.private-workspace { font-size: 11px; }
-.private-workspace small, .profile small { font-size: 10px; }
-.profile { font-size: 12px; }
-.breadcrumb { font-size: 12px; }
-.secure-badge { font-size: 11px; }
-.page-title p { font-size: 13px; }
-.page-title .eyebrow { font-size: 9px; }
-.banner-copy > span { font-size: 9px; }
-.banner-copy p { font-size: 12px; }
-.banner-search input { font-size: 13px; }
-.banner-foot { font-size: 10px; }
-.stat-card > div { font-size: 11px; }
-.stat-card small { font-size: 10px; line-height: 1.7; }
-.section-top h2 { font-size: 18px; }
-.section-top p { font-size: 11px; }
-.section-top .text-link { font-size: 11px; }
-.suggestion-category { font-size: 10px; }
-.suggestion-card strong { font-size: 13px; }
-.table-heading { font-size: 9px; }
-.document-name strong { font-size: 12px; }
-.document-name small { font-size: 10px; }
-.collection-pill, .status-pill, .document-date { font-size: 10px; }
-.document-name small.file-error { font-size: 10px; }
-.empty-library p { font-size: 12px; }
-.library-toolbar > span, .library-info p { font-size: 11px; }
-.library-toolbar > select, .search-field input { font-size: 12px; }
-.chat-top strong { font-size: 13px; }
-.chat-top > div > span { font-size: 11px; }
-.message-author { font-size: 12px; }
-.message-author > span { font-size: 10px; }
-.markdown { font-size: 14px; }
-.source-heading { font-size: 9px; }
-.answer-sources button { font-size: 10px; }
-.answer-sources small { font-size: 9px; }
-.answer-actions, .answer-actions button { font-size: 10px; }
-.chat-suggestions > button, .chat-empty > p { font-size: 12px; }
-.composer-scope, .composer-scope select, .composer-scope > span { font-size: 11px; }
-.chat-composer textarea { font-size: 14px; }
-.composer-note, .composer-note > span { font-size: 9px; }
-.source-passage pre { font-size: 13px; }
-.source-document p, .source-note { font-size: 11px; }
-.source-context-label, .drawer-heading > span { font-size: 10px; }
-.member-row strong { font-size: 13px; }
-.member-row > div > span, .role-pill { font-size: 11px; }
-.member-controls { display: flex; gap: 2px; }
-.role-explainer strong { font-size: 12px; }
-.role-explainer p, .invite-panel > p { font-size: 11px; }
-.invite-panel label, .invite-panel input, .invite-panel select { font-size: 12px; }
-.activity-row { font-size: 12px; }
-.sample-quickstart { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 19px; }
-.sample-quickstart small { color: var(--muted); font-size: 10px; }
+.app-nav button {
+  font-size: 13px;
+}
+.sidebar-caption,
+.sidebar-section-heading {
+  font-size: 9px;
+}
+.workspace-switch select {
+  font-size: 12px;
+}
+.recent-conversations > button {
+  font-size: 12px;
+}
+.recent-conversations > p {
+  font-size: 11px;
+}
+.private-workspace {
+  font-size: 11px;
+}
+.private-workspace small,
+.profile small {
+  font-size: 10px;
+}
+.profile {
+  font-size: 12px;
+}
+.breadcrumb {
+  font-size: 12px;
+}
+.secure-badge {
+  font-size: 11px;
+}
+.page-title p {
+  font-size: 13px;
+}
+.page-title .eyebrow {
+  font-size: 9px;
+}
+.banner-copy > span {
+  font-size: 9px;
+}
+.banner-copy p {
+  font-size: 12px;
+}
+.banner-search input {
+  font-size: 13px;
+}
+.banner-foot {
+  font-size: 10px;
+}
+.stat-card > div {
+  font-size: 11px;
+}
+.stat-card small {
+  font-size: 10px;
+  line-height: 1.7;
+}
+.section-top h2 {
+  font-size: 18px;
+}
+.section-top p {
+  font-size: 11px;
+}
+.section-top .text-link {
+  font-size: 11px;
+}
+.suggestion-category {
+  font-size: 10px;
+}
+.suggestion-card strong {
+  font-size: 13px;
+}
+.table-heading {
+  font-size: 9px;
+}
+.document-name strong {
+  font-size: 12px;
+}
+.document-name small {
+  font-size: 10px;
+}
+.collection-pill,
+.status-pill,
+.document-date {
+  font-size: 10px;
+}
+.document-name small.file-error {
+  font-size: 10px;
+}
+.empty-library p {
+  font-size: 12px;
+}
+.library-toolbar > span,
+.library-info p {
+  font-size: 11px;
+}
+.library-toolbar > select,
+.search-field input {
+  font-size: 12px;
+}
+.chat-top strong {
+  font-size: 13px;
+}
+.chat-top > div > span {
+  font-size: 11px;
+}
+.message-author {
+  font-size: 12px;
+}
+.message-author > span {
+  font-size: 10px;
+}
+.markdown {
+  font-size: 14px;
+}
+.source-heading {
+  font-size: 9px;
+}
+.answer-sources button {
+  font-size: 10px;
+}
+.answer-sources small {
+  font-size: 9px;
+}
+.answer-actions,
+.answer-actions button {
+  font-size: 10px;
+}
+.chat-suggestions > button,
+.chat-empty > p {
+  font-size: 12px;
+}
+.composer-scope,
+.composer-scope select,
+.composer-scope > span {
+  font-size: 11px;
+}
+.chat-composer textarea {
+  font-size: 14px;
+}
+.composer-note,
+.composer-note > span {
+  font-size: 9px;
+}
+.source-passage pre {
+  font-size: 13px;
+}
+.source-document p,
+.source-note {
+  font-size: 11px;
+}
+.source-context-label,
+.drawer-heading > span {
+  font-size: 10px;
+}
+.member-row strong {
+  font-size: 13px;
+}
+.member-row > div > span,
+.role-pill {
+  font-size: 11px;
+}
+.member-controls {
+  display: flex;
+  gap: 2px;
+}
+.role-explainer strong {
+  font-size: 12px;
+}
+.role-explainer p,
+.invite-panel > p {
+  font-size: 11px;
+}
+.invite-panel label,
+.invite-panel input,
+.invite-panel select {
+  font-size: 12px;
+}
+.activity-row {
+  font-size: 12px;
+}
+.sample-quickstart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 19px;
+}
+.sample-quickstart small {
+  color: var(--muted);
+  font-size: 10px;
+}
 @media (max-width: 680px) {
-  .document-name strong { font-size: 10px; }
-  .document-name small { font-size: 9px; }
-  .status-pill { font-size: 8px; }
-  .document-actions button:last-child { display: inline-flex; }
-  .member-row { flex-wrap: wrap; }
-  .markdown { font-size: 13px; }
-  .suggestion-card strong { font-size: 12px; }
-  .chat-composer textarea { font-size: 13px; }
-  .composer-note > span { display: none; }
-  .workspace-switch select { font-size: 12px; }
+  .document-name strong {
+    font-size: 10px;
+  }
+  .document-name small {
+    font-size: 9px;
+  }
+  .status-pill {
+    font-size: 8px;
+  }
+  .document-actions button:last-child {
+    display: inline-flex;
+  }
+  .member-row {
+    flex-wrap: wrap;
+  }
+  .markdown {
+    font-size: 13px;
+  }
+  .suggestion-card strong {
+    font-size: 12px;
+  }
+  .chat-composer textarea {
+    font-size: 13px;
+  }
+  .composer-note > span {
+    display: none;
+  }
+  .workspace-switch select {
+    font-size: 12px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Conversation navigation has its own scroll area, never a squeezed native box. */
+.sidebar {
+  width: 260px;
+  height: 100dvh;
+  padding: 22px 12px 12px;
+  overflow: hidden;
+}
+.app-main {
+  margin-left: 260px;
+}
+.sidebar-logo {
+  margin-bottom: 20px;
+}
+.workspace-switch {
+  margin: 0 6px 17px;
+}
+.app-nav {
+  gap: 2px;
+  flex-shrink: 0;
+}
+.app-nav button {
+  padding: 10px 13px;
+}
+.sidebar-caption,
+.sidebar-section-heading,
+.sidebar-logo,
+.workspace-switch,
+.sidebar-bottom {
+  flex-shrink: 0;
+}
+.sidebar-section-heading {
+  margin-top: 18px;
+  font-size: 9px;
+}
+.sidebar-history-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  margin: 9px 6px 5px;
+  border: 1px solid #dce5d5;
+  background: #fff;
+  border-radius: 7px;
+  color: #718567;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.sidebar-history-search kbd {
+  margin-left: auto;
+  font-size: 8px;
+  color: #9aa98b;
+  font-family: inherit;
+}
+.recent-conversations {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  padding: 4px;
+}
+.recent-conversations > button {
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 10px;
+  line-height: 1.55;
+}
+.recent-conversations > button > svg {
+  margin-top: 3px;
+}
+.recent-conversations span {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.all-chats-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 7px;
+  padding: 4px;
+  color: #708565;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.sidebar-bottom {
+  padding-top: 7px;
+}
+.profile {
+  margin-top: 9px;
+  padding-top: 12px;
+}
+.chat-content {
+  position: relative;
+  min-height: 0;
+  height: calc(100dvh - 124px);
+}
+.chat-messages {
+  min-height: 0;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+}
+.chat-top,
+.chat-composer-wrap {
+  flex-shrink: 0;
+}
+.improved-composer {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.improved-composer textarea {
+  width: 100%;
+  min-height: 48px;
+  max-height: 240px;
+  overflow-y: auto;
+  flex: none;
+  line-height: 1.7;
+}
+.composer-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.composer-tools .composer-tool {
+  background: transparent;
+  color: #859a75;
+  width: 28px;
+  height: 28px;
+}
+.composer-tool:hover {
+  background: #f0f5e9;
+}
+.prompt-length {
+  margin-right: auto;
+  color: #8fa37e;
+  font-size: 10px;
+}
+.jump-latest {
+  position: absolute;
+  bottom: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  background: #fff;
+  box-shadow: 0 4px 15px #36542d20;
+  border: 1px solid #d6e1cc;
+  border-radius: 25px;
+  color: #537b45;
+  font-size: 11px;
+}
+.jump-latest svg {
+  transform: rotate(180deg);
+}
+.prompt-editor,
+.history-dialog {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #dce7d2;
+  border-radius: 13px;
+  box-shadow: 0 20px 70px #102b2530;
+  width: min(960px, 95vw);
+  height: min(85dvh, 800px);
+  padding: 24px;
+}
+.prompt-editor header,
+.history-dialog header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  flex-shrink: 0;
+  margin-bottom: 18px;
+}
+.prompt-editor h2,
+.history-dialog h2 {
+  font-size: 23px;
+  letter-spacing: -0.7px;
+}
+.prompt-editor header p,
+.history-dialog header p {
+  font-size: 12px;
+  color: #8c9b80;
+  margin-top: 7px;
+}
+.prompt-editor textarea {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  resize: none;
+  border: 1px solid #dce7d1;
+  border-radius: 8px;
+  background: #fbfdf8;
+  padding: 18px;
+  font-size: 14px;
+  line-height: 1.85;
+  overflow: auto;
+  tab-size: 4;
+}
+.prompt-editor footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 18px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.prompt-editor footer > span {
+  flex: 1;
+  font-size: 10px;
+  color: #94a687;
+}
+.history-dialog {
+  max-width: 680px;
+  height: min(80dvh, 740px);
+}
+.history-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dce6d2;
+  border-radius: 8px;
+  padding: 11px 13px;
+  color: #8ca078;
+  flex-shrink: 0;
+}
+.history-search input {
+  border: 0;
+  background: none;
+  padding: 0;
+  flex: 1;
+  font-size: 13px;
+  box-shadow: none !important;
+}
+.history-search span {
+  font-size: 9px;
+  color: #a0ad93;
+}
+.history-results {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  margin-top: 16px;
+}
+.history-results > button:not(.btn) {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 16px 12px;
+  border-radius: 8px;
+  border-bottom: 1px solid #eef2e8;
+}
+.history-results > button:hover,
+.history-results > button.active {
+  background: #edf4e5;
+}
+.history-results strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.history-results small {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 10px;
+  color: #9eae8d;
+  margin-top: 7px;
+}
+.history-results svg {
+  color: #94ad80;
+  margin-top: 3px;
+}
+.history-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 30px;
+  font-size: 12px;
+  color: #8fa37e;
+}
+@media (max-height: 800px) {
+  .sidebar .private-workspace {
+    display: none;
+  }
+}
+@media (max-width: 1150px) {
+  .sidebar {
+    width: 235px;
+  }
+  .app-main {
+    margin-left: 235px;
+  }
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 220px;
+  }
+  .app-main {
+    margin-left: 220px;
+  }
+}
+@media (max-width: 680px) {
+  .sidebar {
+    width: 270px;
+  }
+  .app-main {
+    margin-left: 0;
+  }
+  .chat-content {
+    height: calc(100dvh - 108px);
+  }
+  .prompt-editor,
+  .history-dialog {
+    padding: 18px;
+    height: 90dvh;
+  }
+  .prompt-editor footer > span {
+    flex-basis: 100%;
+    font-size: 9px;
+  }
+  .prompt-editor footer .btn {
+    font-size: 10px;
+    padding: 10px;
+  }
+  .prompt-editor textarea {
+    font-size: 13px;
+  }
+  .sidebar-history-search {
+    font-size: 12px;
   }
 }
