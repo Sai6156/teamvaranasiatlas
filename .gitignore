@@ -1,0 +1,16 @@
+secrets.env
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.log
+.vercel/
+test-results/
+playwright-report/
+.runtime/
+*.tsbuildinfo
