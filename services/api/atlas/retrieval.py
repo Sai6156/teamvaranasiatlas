@@ -45,7 +45,12 @@ def focused_queries(question: str, previous: str = "") -> list[str]:
         flags=re.I,
     )
     if len(parts) > 2:
-        queries = [part.strip() for part in parts[1:] if len(part.strip()) > 5]
+        context = parts[0].strip()[:700]
+        queries = [
+            (context + "\n" if context else "") + part.strip()
+            for part in parts[1:]
+            if len(part.strip()) > 5
+        ]
     else:
         queries = [
             part.strip() + "?"
