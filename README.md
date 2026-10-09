@@ -2,6 +2,8 @@
 
 Built by Team Varanasi for the TriCity AI Hackathon. Atlas is a secure company knowledge application: create an account, open a private workspace, invite employees, upload company documents, and ask questions with source evidence.
 
+Live application: [atlas-varanasi.vercel.app](https://atlas-varanasi.vercel.app). API readiness: [atlas-varanasi-api.onrender.com/health/ready](https://atlas-varanasi-api.onrender.com/health/ready). See [release verification](docs/VERIFICATION.md) for measured checks and limits.
+
 ## Stack
 
 Next.js App Router / React / TypeScript; Python FastAPI; Supabase Auth, PostgreSQL/pgvector, and private Storage; OpenRouter; Vercel frontend and Render API/worker.
@@ -74,6 +76,6 @@ Migrations must be deployed before the API/worker. Back up data before schema ch
 
 ## Current scope and submission
 
-This is a hackathon application, not a claim of enterprise security certification or guaranteed hallucination elimination. Review source evidence for important decisions. Billing, enterprise SSO, external knowledge connectors, table-wide deterministic analytics, version comparison, and ZIP ingestion remain future scope.
+This is a hackathon application, not a claim of enterprise security certification or guaranteed hallucination elimination. Review source evidence for important decisions. Billing, enterprise SSO, external knowledge connectors, table-wide deterministic analytics, and version comparison remain future scope.
 
 Use a public repository and add every team member as a collaborator/contributor. Keep the submission ZIP at or below 10 MB, excluding dependencies/build output/secrets. Presentation and product links must be accessible to judges. Video recording is deferred, but its accessible link is still a required hackathon deliverable.

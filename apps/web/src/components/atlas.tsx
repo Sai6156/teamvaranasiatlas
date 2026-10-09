@@ -176,7 +176,7 @@ export default function Atlas() {
     return <AuthView path={pathname} session={session} />;
   if (pathname.startsWith("/app"))
     return session ? (
-      <WorkspaceApp session={session} />
+      <WorkspaceApp key={session.user.id} session={session} />
     ) : (
       <div className="loading-screen">
         <Loader2 className="spin" />
@@ -793,18 +793,26 @@ function WorkspaceApp({ session }: { session: Session }) {
   const [members, setMembers] = useState<Member[]>([]);
   const abort = useRef<AbortController | null>(null);
   const end = useRef<HTMLDivElement | null>(null);
+  const currentWorkspace = useRef<string | null>(null);
+  useEffect(() => {
+    currentWorkspace.current = workspace?.id ?? null;
+  }, [workspace]);
   const router = useRouter();
   const refreshDocuments = useCallback(async () => {
-    if (workspace)
-      setDocuments(
-        await api<CompanyDocument[]>(`/workspaces/${workspace.id}/documents`),
+    if (workspace) {
+      const rows = await api<CompanyDocument[]>(
+        `/workspaces/${workspace.id}/documents`,
       );
+      if (currentWorkspace.current === workspace.id) setDocuments(rows);
+    }
   }, [workspace]);
   const refreshConversations = useCallback(async () => {
-    if (workspace)
-      setConversations(
-        await api<Conversation[]>(`/workspaces/${workspace.id}/conversations`),
+    if (workspace) {
+      const rows = await api<Conversation[]>(
+        `/workspaces/${workspace.id}/conversations`,
       );
+      if (currentWorkspace.current === workspace.id) setConversations(rows);
+    }
   }, [workspace]);
   useEffect(() => {
     api<Workspace[]>("/workspaces")
@@ -827,10 +835,16 @@ function WorkspaceApp({ session }: { session: Session }) {
     setDocuments([]);
     setConversations([]);
     setCitation(null);
+    setMembers([]);
+    setCollection("");
+    setFilter("");
+    setError("");
     Promise.all([
       refreshDocuments(),
       refreshConversations(),
-      api<Member[]>(`/workspaces/${workspace.id}/members`).then(setMembers),
+      api<Member[]>(`/workspaces/${workspace.id}/members`).then((rows) => {
+        if (currentWorkspace.current === workspace.id) setMembers(rows);
+      }),
     ]).catch((error) => setError(errorText(error)));
   }, [workspace, refreshDocuments, refreshConversations]);
   useEffect(() => {
