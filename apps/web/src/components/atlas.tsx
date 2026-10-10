@@ -52,6 +52,7 @@ import remarkGfm from "remark-gfm";
 import ChatComposer from "./chat-composer";
 import ChatHistory from "./chat-history";
 import DemoLibrary, { demoQuestions } from "./demo-library";
+import DemoChatPicker from "./demo-chat-picker";
 import {
   api,
   apiBase,
@@ -912,6 +913,8 @@ function WorkspaceApp({ session }: { session: Session }) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [demoCompanyId, setDemoCompanyId] = useState("");
+  const demoConversationIds = useRef<Record<string, string>>({});
   const [question, setQuestion] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [status, setStatus] = useState("");
@@ -995,6 +998,8 @@ function WorkspaceApp({ session }: { session: Session }) {
     localStorage.setItem("atlas-workspace", workspace.id);
     setMessages([]);
     setConversationId(null);
+    setDemoCompanyId(workspace.is_demo ? workspace.id : "");
+    demoConversationIds.current = {};
     setDocuments([]);
     setConversations([]);
     setCitation(null);
@@ -1045,6 +1050,10 @@ function WorkspaceApp({ session }: { session: Session }) {
   useEffect(() => () => abort.current?.abort(), []);
   const ready = documents.filter((d) => d.status === "ready");
   const collections = [...new Set(documents.map((d) => d.collection))].sort();
+  const demoCompanies = workspaces.filter((row) => row.is_demo);
+  const demoCompany =
+    demoCompanies.find((row) => row.id === demoCompanyId) || null;
+  const chatWorkspace = demoCompany || workspace;
   const fullName =
     session.user.user_metadata.full_name ||
     session.user.email?.split("@")[0] ||
@@ -1058,6 +1067,7 @@ function WorkspaceApp({ session }: { session: Session }) {
     followLatest.current = true;
     setMessages([]);
     setConversationId(null);
+    demoConversationIds.current = {};
     setQuestion("");
     setError("");
     setView("ask");
@@ -1071,6 +1081,10 @@ function WorkspaceApp({ session }: { session: Session }) {
     setView("ask");
     setMenu(false);
     setConversationId(id);
+    setDemoCompanyId(workspace?.is_demo ? workspace.id : "");
+    demoConversationIds.current = workspace?.is_demo
+      ? { [workspace.id]: id }
+      : {};
     setMessages([]);
     setQuestion("");
     setStatus("");
@@ -1078,7 +1092,14 @@ function WorkspaceApp({ session }: { session: Session }) {
     try {
       const loaded = await api<Message[]>(`/conversations/${id}/messages`);
       if (operation !== chatOperation.current) return;
-      setMessages(loaded);
+      setMessages(
+        loaded.map((message) => ({
+          ...message,
+          workspace_id: workspace?.id,
+          workspace_name: workspace?.name,
+          is_demo: workspace?.is_demo,
+        })),
+      );
       setConversationId(id);
       setView("ask");
       setMenu(false);
@@ -1090,6 +1111,11 @@ function WorkspaceApp({ session }: { session: Session }) {
   }
   async function ask(value = question) {
     if (!workspace || !value.trim() || streaming) return;
+    const target = view === "ask" ? chatWorkspace || workspace : workspace;
+    const targetConversation = target.is_demo
+      ? demoConversationIds.current[target.id] || null
+      : conversationId;
+    setDemoCompanyId(target.is_demo ? target.id : "");
     setError("");
     setView("ask");
     setQuestion("");
@@ -1101,27 +1127,37 @@ function WorkspaceApp({ session }: { session: Session }) {
     setCitation(null);
     setMessages((previous) => [
       ...previous,
-      { role: "user", content: value },
-      { role: "assistant", content: "", citations: [] },
+      {
+        role: "user",
+        content: value,
+        workspace_id: target.id,
+        workspace_name: target.name,
+        is_demo: target.is_demo,
+      },
+      {
+        role: "assistant",
+        content: "",
+        citations: [],
+        workspace_id: target.id,
+        workspace_name: target.name,
+        is_demo: target.is_demo,
+      },
     ]);
     const controller = new AbortController();
     abort.current = controller;
     let finished = false;
     try {
       const headers = await authHeaders();
-      const response = await fetch(
-        `${apiBase}/workspaces/${workspace.id}/chat`,
-        {
-          method: "POST",
-          headers: { ...headers, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question: value,
-            conversation_id: conversationId,
-            collection: collection || null,
-          }),
-          signal: controller.signal,
-        },
-      );
+      const response = await fetch(`${apiBase}/workspaces/${target.id}/chat`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: value,
+          conversation_id: targetConversation,
+          collection: target.is_demo ? null : collection || null,
+        }),
+        signal: controller.signal,
+      });
       if (!response.ok) {
         const data = await response.json();
         throw new Error(
@@ -1148,7 +1184,11 @@ function WorkspaceApp({ session }: { session: Session }) {
           buffer = buffer.slice(boundary + 2);
           if (!block.startsWith("data:")) continue;
           const data = JSON.parse(block.slice(5).trim());
-          if (data.type === "conversation") setConversationId(data.id);
+          if (data.type === "conversation") {
+            if (target.is_demo)
+              demoConversationIds.current[target.id] = data.id;
+            if (target.id === workspace.id) setConversationId(data.id);
+          }
           if (data.type === "status") setStatus(data.text);
           if (data.type === "warning") setToast(data.text);
           if (data.type === "model")
@@ -1451,9 +1491,11 @@ function WorkspaceApp({ session }: { session: Session }) {
           <div className="header-actions">
             <span className="secure-badge">
               <LockKeyhole size={12} />
-              {workspace.is_demo ? "Read-only demo" : "Private & secure"}
+              {workspace.is_demo || (view === "ask" && demoCompany)
+                ? "Read-only demo"
+                : "Private & secure"}
             </span>
-            {workspace.role === "admin" && (
+            {workspace.role === "admin" && !(view === "ask" && demoCompany) && (
               <button
                 className="btn primary small"
                 onClick={() => setUploadOpen(true)}
@@ -1871,30 +1913,24 @@ function WorkspaceApp({ session }: { session: Session }) {
                     </span>
                     <h1>Let’s connect the dots.</h1>
                     <p>
-                      {workspace.is_demo
-                        ? `Ask about ${workspace.name}’s performance, strategy or reports.`
+                      {demoCompany
+                        ? `Ask about ${demoCompany.name}’s performance, strategy or reports.`
                         : "Ask about a policy, a process, or a piece of code."}
                       <br />
                       I’ll find the relevant knowledge and show my sources.
                     </p>
-                    <div className="chat-suggestions">
-                      {(workspace.is_demo
-                        ? (demoQuestions[workspace.demo_slug || ""] || []).map(
-                            (question, index) => ({
-                              ...suggested[index],
-                              question,
-                            }),
-                          )
-                        : suggested
-                      ).map((s) => (
-                        <button key={s.label} onClick={() => ask(s.question)}>
-                          <s.icon size={17} />
-                          {s.question}
-                          <ArrowUpRight size={15} />
-                        </button>
-                      ))}
-                    </div>
-                    {!ready.length && (
+                    {!demoCompany && (
+                      <div className="chat-suggestions">
+                        {suggested.map((s) => (
+                          <button key={s.label} onClick={() => ask(s.question)}>
+                            <s.icon size={17} />
+                            {s.question}
+                            <ArrowUpRight size={15} />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {!demoCompany && !ready.length && (
                       <div className="notice warning">
                         <AlertCircle size={16} />
                         Your workspace has no indexed documents yet. Add
@@ -1921,6 +1957,13 @@ function WorkspaceApp({ session }: { session: Session }) {
                           : fullName.split(" ")[0]}
                         {message.role === "assistant" && (
                           <span>Knowledge assistant</span>
+                        )}
+                        {message.workspace_name && (
+                          <span
+                            className={`message-company ${message.is_demo ? "demo" : ""}`}
+                          >
+                            {message.workspace_name}
+                          </span>
                         )}
                       </div>
                       {message.content ? (
@@ -1997,6 +2040,11 @@ function WorkspaceApp({ session }: { session: Session }) {
                           <button
                             onClick={() => {
                               setQuestion(message.content);
+                              setDemoCompanyId(
+                                message.is_demo
+                                  ? message.workspace_id || ""
+                                  : "",
+                              );
                               setFocusPrompt((value) => value + 1);
                             }}
                           >
@@ -2057,21 +2105,38 @@ function WorkspaceApp({ session }: { session: Session }) {
                 </button>
               )}
               <div className="chat-composer-wrap">
-                <div className="composer-scope">
-                  <Folder size={13} />
-                  <select
-                    aria-label="Search scope"
-                    value={collection}
-                    onChange={(e) => setCollection(e.target.value)}
-                    disabled={streaming}
-                  >
-                    <option value="">All knowledge</option>
-                    {collections.map((c) => (
-                      <option key={c}>{c}</option>
-                    ))}
-                  </select>
-                  <span>{ready.length} ready documents</span>
-                </div>
+                <DemoChatPicker
+                  companies={demoCompanies}
+                  selected={demoCompany}
+                  disabled={streaming || historyLoading}
+                  onSelect={(id) => {
+                    setDemoCompanyId(id);
+                    setCollection("");
+                    setError("");
+                    setCitation(null);
+                  }}
+                  onQuestion={(value) => {
+                    setQuestion(value);
+                    setFocusPrompt((previous) => previous + 1);
+                  }}
+                />
+                {!demoCompany && (
+                  <div className="composer-scope">
+                    <Folder size={13} />
+                    <select
+                      aria-label="Search scope"
+                      value={collection}
+                      onChange={(e) => setCollection(e.target.value)}
+                      disabled={streaming}
+                    >
+                      <option value="">All knowledge</option>
+                      {collections.map((c) => (
+                        <option key={c}>{c}</option>
+                      ))}
+                    </select>
+                    <span>{ready.length} ready documents</span>
+                  </div>
+                )}
                 <ChatComposer
                   value={question}
                   onChange={setQuestion}

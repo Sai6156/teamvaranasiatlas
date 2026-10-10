@@ -140,6 +140,9 @@ export type Message = {
   citations?: Citation[];
   model?: string;
   error?: string;
+  workspace_id?: string;
+  workspace_name?: string;
+  is_demo?: boolean;
 };
 export type Conversation = {
   id: string;
