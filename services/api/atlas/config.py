@@ -16,6 +16,7 @@ class Settings(BaseSettings):
         ),
     )
     openrouter_api_key: str = ""
+    openrouter_free_api_key: str = ""
     brevo_api_key: str = ""
     brevo_sender_email: str = ""
     brevo_sender_name: str = "Atlas"

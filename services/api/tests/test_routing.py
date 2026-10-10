@@ -10,7 +10,7 @@ def configured(monkeypatch):
     llm._cooldown.clear()
     monkeypatch.setattr(llm, "_paid_blocked_until", 0.0)
     monkeypatch.setattr(
-        llm, "settings", lambda: Settings(openrouter_api_key="test-key", _env_file=None)
+        llm, "settings", lambda: Settings(openrouter_api_key="test-key", openrouter_free_api_key="free-test-key", _env_file=None)
     )
 
 
@@ -56,6 +56,7 @@ async def test_fallback_keeps_model_provider_boundaries(monkeypatch):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("status", [401, 403])
 async def test_invalid_account_does_not_exhaust_routes(monkeypatch, status):
+    monkeypatch.setattr(llm, "settings", lambda: Settings(openrouter_api_key="test-key", _env_file=None))
     calls = []
 
     def handler(request):
@@ -144,3 +145,26 @@ async def test_embedding_budget_error_opens_free_circuit(monkeypatch):
     with pytest.raises(llm.BudgetUnavailable):
         await llm.embed(["query"])
     assert llm.paid_routes_blocked()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status", [401, 403])
+async def test_paid_key_rejection_switches_to_separate_free_key(monkeypatch, status):
+    calls = []
+    def handler(request):
+        body = json.loads(request.content)
+        calls.append((body["model"], request.headers["authorization"]))
+        if not body["model"].endswith(":free"):
+            return httpx.Response(status)
+        return httpx.Response(200, text='data: {"choices":[{"delta":{"content":"Answer [1]"}}]}\n\ndata: [DONE]\n\n')
+    original = httpx.AsyncClient
+    monkeypatch.setattr(llm.httpx, "AsyncClient", lambda **kw: original(transport=httpx.MockTransport(handler), **kw))
+    _ = [e async for e in llm.generate([])]
+    assert calls == [(llm.ROUTES[0][0], "Bearer test-key"), (llm.FREE_ROUTES[0][0], "Bearer free-test-key")]
+
+
+def test_separate_key_never_authorizes_paid_requests():
+    assert llm.headers()["Authorization"] == "Bearer test-key"
+    assert llm.headers(llm.ROUTES[0][0])["Authorization"] == "Bearer test-key"
+    for model, _ in llm.FREE_ROUTES:
+        assert llm.headers(model)["Authorization"] == "Bearer free-test-key"

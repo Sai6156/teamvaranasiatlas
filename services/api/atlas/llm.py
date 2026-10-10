@@ -47,12 +47,14 @@ class BudgetUnavailable(ConfigurationError):
     """Paid inference is blocked; free inference and keyword search may work."""
 
 
-def headers():
+def headers(model: str | None = None):
     config = settings()
-    if not config.openrouter_api_key:
-        raise ConfigurationError("The AI service has not been configured.")
+    is_free = bool(model and model.endswith(":free"))
+    key = config.openrouter_free_api_key if is_free else config.openrouter_api_key
+    if not key:
+        raise ConfigurationError("The free AI key has not been configured." if is_free else "The AI service has not been configured.")
     return {
-        "Authorization": "Bearer " + config.openrouter_api_key,
+        "Authorization": "Bearer " + key,
         "Content-Type": "application/json",
         "HTTP-Referer": config.frontend_url,
         "X-OpenRouter-Title": "Atlas - Team Varanasi",
@@ -178,7 +180,7 @@ async def generate(
                     async with client.stream(
                         "POST",
                         BASE + "/chat/completions",
-                        headers=headers(),
+                        headers=headers(model),
                         json=model_payload(
                             model, providers, messages, True, max_tokens
                         ),
@@ -251,6 +253,9 @@ async def generate(
                 raise ModelUnavailable("The AI stream was interrupted. Regenerate your answer.")
             continue
         except ConfigurationError:
+            if not model.endswith(":free") and settings().openrouter_free_api_key:
+                mark_budget_exhausted()
+                continue
             raise
         except (httpx.HTTPError, TimeoutError, ModelUnavailable) as error:
             _cooldown[route_key] = time.monotonic() + 30

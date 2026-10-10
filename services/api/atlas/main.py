@@ -130,7 +130,7 @@ def live():
 @app.get("/health/ready")
 async def ready():
     config = settings()
-    if not config.configured or not config.openrouter_api_key:
+    if not config.configured or not (config.openrouter_api_key or config.openrouter_free_api_key):
         raise HTTPException(503, "Workspace and AI connections are not configured.")
     async with httpx.AsyncClient(timeout=5) as client:
         result = await client.get(
@@ -547,7 +547,7 @@ async def chat(
             except ConfigurationError as error:
                 from .llm import BudgetUnavailable
 
-                if not isinstance(error, BudgetUnavailable):
+                if not isinstance(error, BudgetUnavailable) and not settings().openrouter_free_api_key:
                     raise
                 sources, queries = await keyword_retrieve(
                     auth.db, str(org), body.question, previous, body.collection
