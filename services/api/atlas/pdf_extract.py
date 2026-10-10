@@ -68,6 +68,8 @@ def extract_pdf(
     table_errors = 0
     with pymupdf.open(stream=data, filetype="pdf") as document:
         total_pages = len(document)
+        if progress:
+            progress(0, total_pages)
         if document.needs_pass:
             raise ValueError(
                 "Encrypted PDFs are not supported. Upload a decrypted copy."

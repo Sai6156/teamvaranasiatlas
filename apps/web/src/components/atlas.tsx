@@ -930,6 +930,8 @@ function WorkspaceApp({ session }: { session: Session }) {
   const followLatest = useRef(true);
   const end = useRef<HTMLDivElement | null>(null);
   const currentWorkspace = useRef<string | null>(null);
+  const workspaceLoadVersion = useRef(0);
+  const workspaceLoadAbort = useRef<AbortController | null>(null);
   useEffect(() => {
     currentWorkspace.current = workspace?.id ?? null;
   }, [workspace]);
@@ -950,19 +952,42 @@ function WorkspaceApp({ session }: { session: Session }) {
       if (currentWorkspace.current === workspace.id) setConversations(rows);
     }
   }, [workspace]);
+  const loadWorkspaces = useCallback(async () => {
+    const version = ++workspaceLoadVersion.current;
+    workspaceLoadAbort.current?.abort();
+    const controller = new AbortController();
+    workspaceLoadAbort.current = controller;
+    setLoading(true);
+    setError("");
+    try {
+      const rows = await api<Workspace[]>("/workspaces", {
+        signal: controller.signal,
+        timeoutMs: 20000,
+      });
+      if (version !== workspaceLoadVersion.current) return;
+      setWorkspaces(rows);
+      setWorkspace(
+        rows.find((w) => w.id === localStorage.getItem("atlas-workspace")) ||
+          rows[0] ||
+          null,
+      );
+    } catch (error) {
+      if (
+        version === workspaceLoadVersion.current &&
+        !controller.signal.aborted
+      )
+        setError(errorText(error));
+    } finally {
+      if (version === workspaceLoadVersion.current) setLoading(false);
+    }
+  }, [session.user.id]);
   useEffect(() => {
-    api<Workspace[]>("/workspaces")
-      .then((rows) => {
-        setWorkspaces(rows);
-        setWorkspace(
-          rows.find((w) => w.id === localStorage.getItem("atlas-workspace")) ||
-            rows[0] ||
-            null,
-        );
-      })
-      .catch((error) => setError(errorText(error)))
-      .finally(() => setLoading(false));
-  }, []);
+    void loadWorkspaces();
+    return () => {
+      workspaceLoadVersion.current++;
+      workspaceLoadAbort.current?.abort();
+    };
+  }, [loadWorkspaces]);
   useEffect(() => {
     if (!workspace) return;
     localStorage.setItem("atlas-workspace", workspace.id);
@@ -1194,6 +1219,21 @@ function WorkspaceApp({ session }: { session: Session }) {
         <p>Finding your workspaces…</p>
       </div>
     );
+  if (!workspace)
+    if (error)
+      return (
+        <div className="loading-screen">
+          <Logo />
+          <h2>Couldn’t open your workspaces</h2>
+          <p role="alert">{error}</p>
+          <button className="btn primary" onClick={() => void loadWorkspaces()}>
+            Retry connection
+          </button>
+          <button className="text-link" onClick={signOut}>
+            Sign out
+          </button>
+        </div>
+      );
   if (!workspace)
     return (
       <Onboarding

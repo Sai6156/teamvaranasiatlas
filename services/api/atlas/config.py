@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     max_org_daily_questions: int = 200
     max_chunks: int = 8000
     ingestion_timeout_seconds: int = 1800
+    parser_memory_limit_mb: int = 256
     worker_poll_seconds: int = 3
     run_worker: bool = False
 

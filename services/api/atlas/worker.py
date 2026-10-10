@@ -3,7 +3,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from .config import settings
 from .db import Database
-from .extraction import extract, chunk_blocks
+from .isolated_parser import prepare
 from .llm import embed, ConfigurationError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -91,12 +91,7 @@ async def process(db: Database, job: dict):
                 "GET",
                 "/storage/v1/object/company-documents/" + document["storage_path"],
             )
-            blocks, note = await asyncio.to_thread(
-                extract,
-                result.content,
-                document["name"],
-                lambda done, total: progress.__setitem__(slice(None), [done, total]),
-            )
+            chunks, note = await prepare(result.content, document["name"], progress)
             await db.update(
                 "documents",
                 {
@@ -106,7 +101,6 @@ async def process(db: Database, job: dict):
                 },
                 **filters,
             )
-            chunks = chunk_blocks(blocks)
             if len(chunks) > settings().max_chunks:
                 raise ValueError(
                     "Document is too large to index. Split it into smaller files."

@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { withDeadline } from "./deadline";
 
 let client: SupabaseClient | null = null;
 export const configured = Boolean(
@@ -28,11 +29,19 @@ export function supabase() {
   return client;
 }
 export async function authHeaders() {
-  const { data, error } = await supabase().auth.getSession();
+  const { data, error } = await withDeadline(
+    supabase().auth.getSession(),
+    15000,
+    "Your session is taking too long to respond. Please retry or sign in again.",
+  );
   if (error || !data.session) throw new Error("Please sign in to continue.");
   let session = data.session;
   if ((session.expires_at || 0) * 1000 < Date.now() + 60000) {
-    const refreshed = await supabase().auth.refreshSession();
+    const refreshed = await withDeadline(
+      supabase().auth.refreshSession(),
+      15000,
+      "Your session could not be refreshed. Please retry or sign in again.",
+    );
     if (refreshed.error || !refreshed.data.session)
       throw new Error("Your session expired. Please sign in again.");
     session = refreshed.data.session;
@@ -41,30 +50,48 @@ export async function authHeaders() {
 }
 export async function api<T>(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit & { timeoutMs?: number } = {},
 ): Promise<T> {
-  const headers = await authHeaders();
-  const result = await fetch(apiBase + path, {
-    ...options,
-    headers: {
-      ...headers,
-      ...(options.body && !(options.body instanceof FormData)
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...options.headers,
-    },
-  });
-  if (!result.ok) {
-    const error = await result.json().catch(() => ({
-      detail: "Could not reach your workspace. Please retry.",
-    }));
-    throw new Error(
-      typeof error.detail === "string"
-        ? error.detail
-        : "The request could not be completed.",
-    );
+  const { timeoutMs = 60000, signal, ...requestOptions } = options;
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  signal?.addEventListener("abort", cancel, { once: true });
+  if (signal?.aborted) controller.abort();
+  async function request(): Promise<T> {
+    const headers = await authHeaders();
+    const result = await fetch(apiBase + path, {
+      ...requestOptions,
+      signal: controller.signal,
+      headers: {
+        ...headers,
+        ...(options.body && !(options.body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
+        ...options.headers,
+      },
+    });
+    if (!result.ok) {
+      const error = await result.json().catch(() => ({
+        detail: "Could not reach your workspace. Please retry.",
+      }));
+      throw new Error(
+        typeof error.detail === "string"
+          ? error.detail
+          : "The request could not be completed.",
+      );
+    }
+    return result.json();
   }
-  return result.json();
+  try {
+    return await withDeadline(
+      request(),
+      timeoutMs,
+      "The workspace service is taking too long to respond. Please retry in a moment.",
+    );
+  } finally {
+    controller.abort();
+    signal?.removeEventListener("abort", cancel);
+  }
 }
 export type Workspace = {
   id: string;
