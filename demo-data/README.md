@@ -5,6 +5,16 @@ https://atlas-varanasi.vercel.app/app and choose **Explore demo companies** in
 the sidebar. A verified account with no private workspace opens the company
 picker directly. Each account's chats are private, even in these shared demos.
 
+Inside **Ask Atlas**, the **Demo company files** selector above the input also
+lets a judge visit all ten companies in one visible chat. Four questions are
+shuffled locally from a curated five-question set for the selected company.
+Selecting companies, refreshing suggestions and filling a question make no
+model requests. Earlier messages stay visible and carry company labels. Each
+company keeps its own conversation context; another company's questions and
+answers are not sent along with the next request. Source citations continue to
+open their original documents. The combined visible journey lasts for the
+current open chat; company conversations are individually stored privately.
+
 | India | Global |
 | --- | --- |
 | Reliance Industries | Microsoft |
