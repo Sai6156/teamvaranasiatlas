@@ -41,6 +41,8 @@ Use at least a 12-character password policy in Supabase Auth; enable compromised
 - Private library, named collections, file upload, indexing status, failure retry, source download, and deletion.
 - Hybrid PostgreSQL full-text/pgvector retrieval and streamed grounded answers.
 - Citation cards with exact passages and source locations; private per-user conversations.
+- Searchable, scrollable conversation history and an expandable long-prompt editor with full-draft copying.
+- Complete PDF page indexing, structured table evidence, per-file indexing progress, and focused answers for multi-question prompts.
 - Workspace invitations and audit activity.
 - Durable PostgreSQL jobs with leases, bounded retries, idempotent chunk indexing, and immediate removal from search on deletion.
 - Per-workspace document/storage/question limits; authenticated API, RLS, and private Storage policies.
@@ -49,7 +51,7 @@ Use at least a 12-character password policy in Supabase Auth; enable compromised
 
 TXT, Markdown, logs, common programming/config files, JSON/YAML/TOML, SQL, HTML/XML, notebook source, PDF, DOCX, CSV/TSV, XLSX, PPTX, common images, and bounded ZIP archives. Linux deployment includes Tesseract and Poppler for OCR. PDF, paragraph, slide, row/sheet, and line references are preserved. ZIP members retain their paths and source locations; unsupported members are explicitly skipped. Nested/encrypted archives, unsafe paths, symbolic links, and excessive expansion are rejected.
 
-Limits: 25 MB/file, 200 PDF pages, 40 scanned OCR pages, 100,000 spreadsheet/table rows, 2,000 chunks/file, 200 documents and 500 MB per workspace, and 200 questions/workspace/day. ZIP archives are limited to 100 files and 75 MB expanded content. Legacy Office formats, encrypted files, audio/video, executables, and arbitrary binary formats are not currently supported. Image-only content in Office documents is not OCR'd. XLSX uses saved values and does not recalculate formulas. RAG cannot provide exact totals over an entire spreadsheet from only retrieved row subsets; Atlas explicitly asks the model to disclose this limitation.
+Limits: 25 MB/file, 1,500 physical PDF pages, 200 scanned OCR pages, 100,000 spreadsheet/table rows, 8,000 chunks/file, 200 documents and 500 MB per workspace, and 200 questions/workspace/day. ZIP archives are limited to 100 files and 75 MB expanded content. Legacy Office formats, encrypted files, audio/video, executables, and arbitrary binary formats are not currently supported. Image-only content in Office documents is not OCR'd. XLSX uses saved values and does not recalculate formulas. RAG cannot provide exact totals over an entire spreadsheet from only retrieved row subsets; Atlas explicitly asks the model to disclose this limitation.
 
 ## AI routing
 
