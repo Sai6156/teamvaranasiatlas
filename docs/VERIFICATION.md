@@ -6,6 +6,14 @@ API readiness: https://atlas-varanasi-api.onrender.com/health/ready
 
 Repository: https://github.com/Sai6156/teamvaranasiatlas
 
+## Email-code rollout — prepared, delivery setup pending
+
+The email-code signup/reset screens and direct Brevo invitation delivery are implemented on `codex/brevo-email-codes`. They have not replaced production yet: Brevo rejects the provided API key from the development IP because that IP is not authorized. Sender discovery, delivery testing, and the final production rollout are pending that account configuration. The rate-limit migration is already applied and does not change existing login behavior.
+
+The frontend production build and TypeScript checks pass, and 36 backend tests pass. A regression against the real Supabase project (capturing outbound email locally) verified: signup cannot log in before confirmation; invalid and reused codes fail; requesting another email within 60 seconds fails; an invitation cannot be accepted by another email or replayed; the correct invitee receives employee access; and recovery changes the password, rejecting the old one. All test accounts and the empty workspace were removed. This test does not establish Brevo inbox delivery. Supabase currently generates eight-digit email codes for this project.
+
+New users follow invitation link → signup → email code → accept workspace. Existing verified users follow invitation link → password login → accept workspace. Invitations retain their email binding, seven-day expiry, and single-use behavior.
+
 ## Large-report and conversation update
 
 The frontend changes are deployed on Vercel. Render is live on application commit `0f9790da6709ce3f28b25e3ff6e2ea8bbc556b96`.

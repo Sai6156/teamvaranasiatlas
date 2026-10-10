@@ -32,6 +32,8 @@ from .llm import ConfigurationError, ModelUnavailable, generate
 from .grounding import citation_support, abstention, disclosed_column_totals
 from .retrieval import retrieve
 from .batch_answer import answer_batch
+from .email_auth import router as email_auth_router, reserve_email
+from .email_delivery import require_email_delivery, send_invitation
 
 logger = logging.getLogger("atlas.api")
 
@@ -55,6 +57,7 @@ app = FastAPI(
     docs_url="/docs",
     lifespan=lifespan,
 )
+app.include_router(email_auth_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in settings().allowed_origins.split(",")],
@@ -207,6 +210,8 @@ async def manage_member(
 @app.post("/workspaces/{org}/invitations", status_code=201)
 async def invite(org: UUID, body: InviteBody, auth: Identity = Depends(identity)):
     await member(auth, org, admin=True)
+    require_email_delivery()
+    await reserve_email(body.email, "inviter:" + auth.user["id"], "invitation")
     token = secrets.token_urlsafe(32)
     result = await auth.db.rpc(
         "create_invitation",
@@ -217,9 +222,25 @@ async def invite(org: UUID, body: InviteBody, auth: Identity = Depends(identity)
             "secret_hash": hashlib.sha256(token.encode()).hexdigest(),
         },
     )
+    url = (
+        settings().frontend_url.rstrip("/")
+        + "/join?invite="
+        + token
+        + "&email="
+        + quote(body.email, safe="")
+    )
+    workspace = await auth.db.select(
+        "organizations", id="eq." + str(org), select="name", limit="1"
+    )
+    try:
+        await send_invitation(body.email, workspace[0]["name"], url)
+    except (HTTPException, httpx.HTTPError):
+        await Database(privileged=True).delete("invitations", id="eq." + str(result))
+        raise
     return {
         "id": result,
-        "url": settings().frontend_url.rstrip("/") + "/join?invite=" + token,
+        "url": url,
+        "delivery": "sent",
         "email": body.email,
         "expires_in_days": 7,
     }

@@ -16,6 +16,9 @@ class Settings(BaseSettings):
         ),
     )
     openrouter_api_key: str = ""
+    brevo_api_key: str = ""
+    brevo_sender_email: str = ""
+    brevo_sender_name: str = "Atlas"
     frontend_url: str = "http://localhost:3000"
     allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
     embedding_model: str = "openai/text-embedding-3-small"

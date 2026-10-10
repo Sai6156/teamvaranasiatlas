@@ -423,6 +423,10 @@ function AuthView({
   const [notice, setNotice] = useState("");
   const [invite, setInvite] = useState("");
   const [recovery, setRecovery] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [code, setCode] = useState("");
+  const [resendAt, setResendAt] = useState(0);
+  const [countdown, setCountdown] = useState(0);
   const signup = path === "/signup",
     forgot = path === "/forgot-password",
     reset = path === "/reset-password",
@@ -431,7 +435,17 @@ function AuthView({
   useEffect(() => {
     setError("");
     setNotice("");
+    setCodeSent(false);
+    setCode("");
+    if (path === "/reset-password") setPassword("");
     if (typeof window !== "undefined") {
+      const invitedEmail =
+        new URLSearchParams(window.location.search).get("email") ||
+        sessionStorage.getItem("atlas-invited-email");
+      if (invitedEmail) {
+        setEmail(invitedEmail);
+        sessionStorage.setItem("atlas-invited-email", invitedEmail);
+      }
       setInvite(
         new URLSearchParams(window.location.search).get("invite") ||
           sessionStorage.getItem("atlas-invite") ||
@@ -441,14 +455,54 @@ function AuthView({
     }
   }, [path]);
   useEffect(() => {
+    const tick = () =>
+      setCountdown(Math.max(0, Math.ceil((resendAt - Date.now()) / 1000)));
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendAt]);
+  useEffect(() => {
     if (invite) sessionStorage.setItem("atlas-invite", invite);
   }, [invite]);
   useEffect(() => {
-    if (session && !reset && !join && !callback)
+    if (
+      session &&
+      !reset &&
+      !join &&
+      !callback &&
+      !forgot &&
+      !(signup && codeSent)
+    )
       router.replace(sessionStorage.getItem("atlas-invite") ? "/join" : "/app");
     if (callback && session)
       router.replace(sessionStorage.getItem("atlas-invite") ? "/join" : "/app");
-  }, [session, reset, join, callback, router]);
+  }, [session, reset, join, callback, forgot, signup, codeSent, router]);
+  async function requestCode() {
+    const response = await fetch(apiBase + "/auth/email-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        purpose: signup ? "signup" : "recovery",
+        ...(signup ? { password, full_name: name } : {}),
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(
+        typeof data.detail === "string"
+          ? data.detail
+          : "Could not send the verification code. Please try again.",
+      );
+    setCodeSent(true);
+    setCode("");
+    setResendAt(Date.now() + 60000);
+    setNotice(
+      signup
+        ? "If this email can sign up, a confirmation code is on its way. Already registered? Sign in instead."
+        : "If an account exists for this email, a reset code is on its way.",
+    );
+  }
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true);
@@ -466,19 +520,41 @@ function AuthView({
         );
         localStorage.setItem("atlas-workspace", result.organization_id);
         sessionStorage.removeItem("atlas-invite");
+        sessionStorage.removeItem("atlas-invited-email");
         router.replace("/app");
-      } else if (forgot) {
-        const { error } = await client.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + "/reset-password",
-        });
-        if (error) throw error;
-        setNotice(
-          "If an account exists for that email, a password reset link is on its way.",
-        );
+      } else if (signup || forgot) {
+        if (!codeSent) {
+          await requestCode();
+        } else {
+          const { error } = await client.auth.verifyOtp({
+            email: email.trim().toLowerCase(),
+            token: code.trim(),
+            type: signup ? "email" : "recovery",
+          });
+          if (error)
+            throw new Error(
+              "That code is invalid or expired. Check the latest email or request a new code.",
+            );
+          if (signup) {
+            const { error: updateError } = await client.auth.updateUser({
+              password,
+              data: { full_name: name },
+            });
+            if (updateError && updateError.code !== "same_password")
+              throw updateError;
+            setPassword("");
+            router.replace(
+              sessionStorage.getItem("atlas-invite") ? "/join" : "/app",
+            );
+          } else {
+            sessionStorage.setItem("atlas-recovery", "true");
+            router.replace("/reset-password");
+          }
+        }
       } else if (reset) {
         if (!recovery || !session)
           throw new Error(
-            "Open the password reset link from your email before setting a new password.",
+            "Verify the reset code sent to your email before setting a new password.",
           );
         const { error } = await client.auth.updateUser({ password });
         if (error) throw error;
@@ -486,22 +562,6 @@ function AuthView({
         setNotice("Your password has been updated.");
         setPassword("");
         router.replace("/app");
-      } else if (signup) {
-        const { data, error } = await client.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name },
-            emailRedirectTo: window.location.origin + "/auth/callback",
-          },
-        });
-        if (error) throw error;
-        setPassword("");
-        if (data.session) router.replace("/app");
-        else
-          setNotice(
-            "Check your inbox to verify your email. Then come back and sign in to create your workspace.",
-          );
       } else {
         const { error } = await client.auth.signInWithPassword({
           email,
@@ -521,14 +581,9 @@ function AuthView({
   }
   async function resend() {
     setBusy(true);
+    setError("");
     try {
-      const { error } = await supabase().auth.resend({
-        type: "signup",
-        email,
-        options: { emailRedirectTo: window.location.origin + "/auth/callback" },
-      });
-      if (error) throw error;
-      setNotice("A new verification email has been sent.");
+      await requestCode();
     } catch (error) {
       setError(errorText(error));
     } finally {
@@ -577,35 +632,43 @@ function AuthView({
             {forgot ? <Mail /> : join ? <Users /> : <LockKeyhole />}
           </span>
           <span className="eyebrow">
-            {signup
-              ? "MAKE ROOM FOR BETTER ANSWERS"
-              : "YOUR KNOWLEDGE, WITHIN REACH"}
+            {codeSent && (signup || forgot)
+              ? "Check your inbox"
+              : signup
+                ? "MAKE ROOM FOR BETTER ANSWERS"
+                : "YOUR KNOWLEDGE, WITHIN REACH"}
           </span>
           <h2>
-            {signup
-              ? "Create your account"
-              : forgot
-                ? "Forgot your password?"
-                : reset
-                  ? "Set a new password"
-                  : join
-                    ? "Join your team"
-                    : callback
-                      ? "Confirming your account…"
-                      : "Welcome back."}
+            {codeSent && (signup || forgot)
+              ? signup
+                ? "Verify your email"
+                : "Verify reset code"
+              : signup
+                ? "Create your account"
+                : forgot
+                  ? "Forgot your password?"
+                  : reset
+                    ? "Set a new password"
+                    : join
+                      ? "Join your team"
+                      : callback
+                        ? "Confirming your account…"
+                        : "Welcome back."}
           </h2>
           <p>
-            {signup
-              ? "Start with a secure account. Create or join a company workspace next."
-              : forgot
-                ? "We’ll send a secure link to help you get back in."
-                : reset
-                  ? "Choose a strong password for your account."
-                  : join
-                    ? "Accept your workspace invitation using the email it was sent to."
-                    : callback
-                      ? "We’re checking your email verification."
-                      : "Sign in to pick up where you left off."}
+            {codeSent && (signup || forgot)
+              ? `Enter the verification code sent to ${email}. Use the latest code, and check spam if needed.`
+              : signup
+                ? "Start with a secure account. Create or join a company workspace next."
+                : forgot
+                  ? "Enter your account email. We’ll send a code so you can choose a new password."
+                  : reset
+                    ? "Choose a strong password for your account."
+                    : join
+                      ? "Accept your workspace invitation using the email it was sent to."
+                      : callback
+                        ? "We’re checking your email verification."
+                        : "Sign in to pick up where you left off."}
           </p>
           {!configured && (
             <div className="notice warning">
@@ -626,6 +689,24 @@ function AuthView({
             <div className="notice success" role="status">
               <CheckCircle2 size={17} />
               {notice}
+            </div>
+          )}
+          {join && session && (
+            <div className="notice">
+              <span>
+                Signed in as {session.user.email}. Use the email this invitation
+                was sent to.
+              </span>
+              <button
+                className="text-link"
+                type="button"
+                onClick={async () => {
+                  await supabase().auth.signOut();
+                  router.replace("/login");
+                }}
+              >
+                Use another account
+              </button>
             </div>
           )}
           {callback ? (
@@ -650,7 +731,30 @@ function AuthView({
             </div>
           ) : (
             <form onSubmit={submit}>
-              {(signup || join) && (
+              {codeSent && (signup || forgot) && (
+                <label>
+                  Email verification code
+                  <input
+                    className="otp-input"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    autoFocus
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                    pattern="[0-9]{6,10}"
+                    minLength={6}
+                    maxLength={10}
+                    placeholder="Enter your code"
+                    required
+                  />
+                  <small className="field-help">
+                    Keep this page open while you check your email. Never share
+                    your code.
+                  </small>
+                </label>
+              )}
+              {(signup || join) && !codeSent && (
                 <label>
                   Full name
                   <input
@@ -663,7 +767,7 @@ function AuthView({
                   />
                 </label>
               )}
-              {!reset && !join && (
+              {!reset && !join && !codeSent && (
                 <label>
                   Work email
                   <input
@@ -677,7 +781,7 @@ function AuthView({
                   />
                 </label>
               )}
-              {!forgot && !join && (
+              {!forgot && !join && !codeSent && (
                 <label>
                   <span className="label-row">
                     Password
@@ -727,27 +831,46 @@ function AuthView({
                 }
               >
                 {busy ? <Loader2 size={18} className="spin" /> : null}
-                {signup
-                  ? "Create account"
-                  : forgot
-                    ? "Send reset link"
-                    : reset
-                      ? "Update password"
-                      : join
-                        ? "Join workspace"
-                        : "Sign in"}
+                {codeSent && (signup || forgot)
+                  ? signup
+                    ? "Verify email & create account"
+                    : "Verify reset code"
+                  : signup
+                    ? "Send confirmation code"
+                    : forgot
+                      ? "Send reset code"
+                      : reset
+                        ? "Update password"
+                        : join
+                          ? "Join workspace"
+                          : "Sign in"}
                 {!busy && <ArrowRight size={17} />}
               </button>
             </form>
           )}
-          {notice && signup && email && (
-            <button
-              className="text-link resend"
-              onClick={resend}
-              disabled={busy}
-            >
-              Resend verification email
-            </button>
+          {codeSent && (signup || forgot) && email && (
+            <div className="otp-actions">
+              <button
+                className="text-link resend"
+                onClick={resend}
+                disabled={busy || countdown > 0}
+              >
+                {countdown > 0 ? `Resend code in ${countdown}s` : "Resend code"}
+              </button>
+              <button
+                className="text-link"
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setCodeSent(false);
+                  setCode("");
+                  setNotice("");
+                  setError("");
+                }}
+              >
+                Change email
+              </button>
+            </div>
           )}
           {!forgot && !reset && !join && !callback && (
             <div className="auth-switch">
@@ -2633,7 +2756,7 @@ function TeamView({
           <h2>Make room for your team.</h2>
           <p>
             {workspace.role === "admin"
-              ? "Create an invitation link for a specific email. Share it directly with your teammate."
+              ? "Enter your teammate’s email. We’ll send their invitation directly to their inbox."
               : "Your workspace admin can invite new people to join."}
           </p>
           {workspace.role === "admin" && (
@@ -2663,7 +2786,7 @@ function TeamView({
                 ) : (
                   <Plus size={16} />
                 )}
-                Create invitation
+                Send invitation
               </button>
             </form>
           )}
@@ -2672,7 +2795,7 @@ function TeamView({
             <div className="invite-result">
               <span>
                 <CheckCircle2 size={15} />
-                Invitation ready · expires in 7 days
+                Invitation emailed · expires in 7 days
               </span>
               <p>Only the invited, verified email can accept this link.</p>
               <div>

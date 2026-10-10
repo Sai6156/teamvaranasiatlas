@@ -23,27 +23,27 @@ Requirements: Node.js 22 or 24, Python 3.12+, a Supabase project, and an OpenRou
 9. In another terminal from `services/api`, run `python -m atlas.worker`.
 10. From the root, run `npm run dev`; open `http://127.0.0.1:3000`.
 
-Passwords are sent directly to Supabase Auth and are not stored in application tables. Never commit `secrets.env`, `.env`, service/secret keys, or generated test credentials. The browser receives only the public Supabase key and its own session token.
+Signup passwords pass through the server to Supabase Auth; login and password updates use Supabase directly. Passwords are never stored in application tables or logged. Never commit `secrets.env`, `.env`, service/secret keys, or generated test credentials. The browser receives only the public Supabase key and its own session token.
 
 ## Required authentication setup
 
-Keep email confirmation enabled. Configure custom SMTP in Supabase Auth before opening signup to judges: the default mail service restricts recipients and is unsuitable for general external signup. Set the site URL to the deployed Vercel origin. Allow these redirects on the production origin and localhost for development:
+Keep email confirmation enabled. Configure server-only `BREVO_API_KEY`, `BREVO_SENDER_EMAIL` (a verified sender), and `BREVO_SENDER_NAME`. Signup and password recovery deliver Supabase-generated one-time codes through the Brevo transactional API. Enter the code in Atlas to verify the email or reset the password. Supabase remains responsible for code verification and password storage. Custom Supabase SMTP can remain configured for legacy links and other native Auth emails. Set the site URL to the deployed Vercel origin. Allow these redirects on the production origin and localhost for development:
 
 - `/auth/callback` — signup verification
 - `/reset-password` — password recovery
 
-Use at least a 12-character password policy in Supabase Auth; enable compromised-password checks if the project's plan supports them. Frontend forms enforce the 12-character minimum for signup and reset, but the Supabase server policy is authoritative. Invitations are email-bound, single-use, and expire after seven days. Administrators share invitation links themselves; the app does not send invitation emails.
+Use at least a 12-character password policy in Supabase Auth; enable compromised-password checks if the project's plan supports them. Frontend forms enforce the 12-character minimum for signup and reset, but the Supabase server policy is authoritative. Invitations are email-bound, single-use, and expire after seven days. Atlas emails invitation links directly through Brevo. New teammates verify their invited email with a signup code before accepting; existing verified users sign in and accept. No separate invitation code is needed.
 
 ## Features
 
-- Email signup, verification, login, recovery, signout, and workspace onboarding.
+- Email-code signup verification and password recovery through Brevo, password login, signout, and workspace onboarding.
 - Multiple organization workspaces with administrator/employee roles.
 - Private library, named collections, file upload, indexing status, failure retry, source download, and deletion.
 - Hybrid PostgreSQL full-text/pgvector retrieval and streamed grounded answers.
 - Citation cards with exact passages and source locations; private per-user conversations.
 - Searchable, scrollable conversation history and an expandable long-prompt editor with full-draft copying.
 - Complete PDF page indexing, structured table evidence, per-file indexing progress, and focused answers for multi-question prompts.
-- Workspace invitations and audit activity.
+- Direct email workspace invitations, role management, and audit activity.
 - Durable PostgreSQL jobs with leases, bounded retries, idempotent chunk indexing, and immediate removal from search on deletion.
 - Per-workspace document/storage/question limits; authenticated API, RLS, and private Storage policies.
 
@@ -70,7 +70,7 @@ Vercel project root: `apps/web`. Public environment variables: `NEXT_PUBLIC_SUPA
 
 Render Docker context: `services/api`; Dockerfile: `services/api/Dockerfile`. API uses the image default command. Worker command: `python -m atlas.worker`. Set server secrets and `FRONTEND_URL`/`ALLOWED_ORIGINS` to the exact production origin. API liveness: `/health/live`; readiness: `/health/ready`. A `render.yaml` blueprint is provided when available; service plans must be selected with the account owner's budget approval. Free API instances have cold starts. Worker-only services require paid hosting.
 
-Migrations must be deployed before the API/worker. Back up data before schema changes; deploy compatible changes first. Logs use job/request IDs, not keys or full uploaded documents. Supabase security-definer RPCs deliberately expose only validated membership/role operations; ingestion jobs have no user-access policies because they are server-only.
+Migrations must be deployed before the API/worker. Back up data before schema changes; deploy compatible changes first. Logs use job/request IDs, not keys, passwords, verification codes, or full uploaded documents. Auth email requests have durable limits: one request per recipient per minute, five per hour, and thirty per requesting actor per hour. Sender IPs must be authorized in Brevo when IP restrictions are enabled. Supabase security-definer RPCs deliberately expose only validated membership/role operations; ingestion jobs have no user-access policies because they are server-only.
 
 ## Verification
 

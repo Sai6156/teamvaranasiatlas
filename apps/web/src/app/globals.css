@@ -3931,3 +3931,10 @@ label > select {
     font-size: 12px;
   }
 }
+.otp-input {
+  font-size: 1.4rem !important;
+  letter-spacing: .2em;
+  text-align: center;
+}
+.otp-actions { display: flex; justify-content: space-between; gap: 16px; margin-top: 16px; }
+.otp-actions button:disabled { opacity: .55; cursor: not-allowed; }
