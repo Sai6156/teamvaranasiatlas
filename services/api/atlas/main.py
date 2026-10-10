@@ -30,7 +30,7 @@ from .db import Database
 from .extraction import SUPPORTED_EXTENSIONS
 from .llm import ConfigurationError, ModelUnavailable, generate
 from .grounding import citation_support, abstention, disclosed_column_totals
-from .retrieval import retrieve
+from .retrieval import retrieve, keyword_retrieve
 from .batch_answer import answer_batch
 from .email_auth import router as email_auth_router, reserve_email
 from .email_delivery import require_email_delivery, send_invitation
@@ -544,29 +544,19 @@ async def chat(
                 sources, queries = await retrieve(
                     auth.db, str(org), body.question, previous, body.collection
                 )
-            except ConfigurationError:
-                raise
-            except (ModelUnavailable, httpx.HTTPError):
-                from .retrieval import focused_queries, lexical_query, rank
+            except ConfigurationError as error:
+                from .llm import BudgetUnavailable
 
-                queries = focused_queries(body.question, previous)
-                rows = await auth.db.rpc(
-                    "search_chunks_v2",
-                    {
-                        "org": str(org),
-                        "lexical_query": lexical_query(body.question),
-                        "query_embedding": None,
-                        "result_limit": 40,
-                        "folder": body.collection,
-                    },
+                if not isinstance(error, BudgetUnavailable):
+                    raise
+                sources, queries = await keyword_retrieve(
+                    auth.db, str(org), body.question, previous, body.collection
                 )
-                sources = rank(body.question, rows)[:20]
-                yield event(
-                    {
-                        "type": "warning",
-                        "text": "Semantic search is busy. Using keyword search for this answer.",
-                    }
+            except (ModelUnavailable, httpx.HTTPError):
+                sources, queries = await keyword_retrieve(
+                    auth.db, str(org), body.question, previous, body.collection
                 )
+                yield event({"type": "status", "text": "Searching your workspace by keyword"})
             for index, source in enumerate(sources):
                 source["number"] = index + 1
             if not sources:

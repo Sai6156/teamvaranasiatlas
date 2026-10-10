@@ -16,8 +16,23 @@ ROUTES = [
     ("openai/gpt-6-luna", ["openai", "azure"]),
     ("qwen/qwen3.8-flash", []),
 ]
+FREE_ROUTES = [
+    ("nvidia/nemotron-3-ultra-550b-a55b:free", []),
+    ("apodex/apodex-1.1-mini:free", []),
+]
 BASE = "https://openrouter.ai/api/v1"
 _cooldown: dict[str, float] = {}
+_paid_blocked_until = 0.0
+
+
+def paid_routes_blocked() -> bool:
+    return _paid_blocked_until > time.monotonic()
+
+
+def mark_budget_exhausted():
+    global _paid_blocked_until
+    # Recheck paid service after one minute so a top-up recovers automatically.
+    _paid_blocked_until = time.monotonic() + 60
 
 
 class ModelUnavailable(Exception):
@@ -26,6 +41,10 @@ class ModelUnavailable(Exception):
 
 class ConfigurationError(ModelUnavailable):
     pass
+
+
+class BudgetUnavailable(ConfigurationError):
+    """Paid inference is blocked; free inference and keyword search may work."""
 
 
 def headers():
@@ -55,6 +74,8 @@ def provider_policy(providers: list[str]):
 
 async def embed(texts: list[str]) -> list[list[float]]:
     config = settings()
+    if paid_routes_blocked():
+        raise BudgetUnavailable("Paid semantic search is temporarily unavailable.")
     async with httpx.AsyncClient(timeout=40) as client:
         for attempt in range(3):
             result = await client.post(
@@ -67,7 +88,10 @@ async def embed(texts: list[str]) -> list[list[float]]:
                     "provider": {"data_collection": config.openrouter_data_collection},
                 },
             )
-            if result.status_code in (401, 402, 403):
+            if result.status_code == 402:
+                mark_budget_exhausted()
+                raise BudgetUnavailable("Paid semantic search is temporarily unavailable.")
+            if result.status_code in (401, 403):
                 raise ConfigurationError(
                     "The AI account key, spending limit or balance needs attention."
                 )
@@ -107,7 +131,10 @@ def model_payload(
         "stream": stream,
         "provider": provider_policy(providers),
     }
-    if model.startswith("openai/"):
+    if model.endswith(":free"):
+        payload["provider"]["max_price"] = {"prompt": 0, "completion": 0}
+        payload["reasoning"] = {"enabled": False, "exclude": True}
+    elif model.startswith("openai/"):
         payload["reasoning"] = {"effort": "low"}
         if providers == ["azure"]:
             payload["max_completion_tokens"] = payload.pop("max_tokens")
@@ -131,8 +158,11 @@ async def generate(
         (ROUTES[2][0], ["openai"]),
         (ROUTES[2][0], ["azure"]),
         ROUTES[3],
+        *FREE_ROUTES,
     ]
     for model, providers in attempts:
+        if not model.endswith(":free") and paid_routes_blocked():
+            continue
         route_key = model + "/" + ",".join(providers)
         if _cooldown.get(route_key, 0) > time.monotonic():
             continue
@@ -153,14 +183,19 @@ async def generate(
                             model, providers, messages, True, max_tokens
                         ),
                     ) as response:
-                        if response.status_code in (401, 402, 403):
+                        if response.status_code == 402:
+                            if not model.endswith(":free"):
+                                mark_budget_exhausted()
+                            else:
+                                _cooldown[route_key] = time.monotonic() + 30
+                            continue
+                        if response.status_code in (401, 403):
                             raise ConfigurationError(
                                 "The AI account key, spending limit or balance needs attention."
                             )
                         if response.status_code in (400, 422):
-                            raise ConfigurationError(
-                                "The AI request configuration needs attention."
-                            )
+                            _cooldown[route_key] = time.monotonic() + 30
+                            continue
                         if response.is_error:
                             _cooldown[route_key] = time.monotonic() + 30
                             continue
@@ -178,6 +213,10 @@ async def generate(
                             except json.JSONDecodeError:
                                 continue
                             if data.get("error"):
+                                if not emitted and data["error"].get("code") == 402:
+                                    if not model.endswith(":free"):
+                                        mark_budget_exhausted()
+                                    raise BudgetUnavailable("Paid inference is temporarily unavailable.")
                                 raise ModelUnavailable(
                                     "The AI stream was interrupted. Regenerate your answer."
                                 )
@@ -207,6 +246,10 @@ async def generate(
                                 )
                             return
                         _cooldown[route_key] = time.monotonic() + 30
+        except BudgetUnavailable:
+            if emitted:
+                raise ModelUnavailable("The AI stream was interrupted. Regenerate your answer.")
+            continue
         except ConfigurationError:
             raise
         except (httpx.HTTPError, TimeoutError, ModelUnavailable) as error:
@@ -217,5 +260,5 @@ async def generate(
                 ) from error
             continue
     raise ModelUnavailable(
-        "All preferred AI routes are temporarily unavailable. Please try again shortly."
+        "Paid and free AI routes are temporarily unavailable or rate limited. Please try again shortly."
     )

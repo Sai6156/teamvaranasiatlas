@@ -203,3 +203,14 @@ async def retrieve(
             if key != "table_header"
         }
     return sources, queries
+
+
+async def keyword_retrieve(db, org, question, previous="", collection=None):
+    """Use the existing scoped full-text index when paid embeddings are blocked."""
+    queries = focused_queries(question, previous)
+    rows = await db.rpc(
+        "search_chunks_v2",
+        {"org": org, "lexical_query": lexical_query(question),
+         "query_embedding": None, "result_limit": 40, "folder": collection},
+    )
+    return rank(question, rows)[:20], queries
