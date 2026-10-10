@@ -465,6 +465,10 @@ function AuthView({
     if (invite) sessionStorage.setItem("atlas-invite", invite);
   }, [invite]);
   useEffect(() => {
+    if (join && typeof session?.user.user_metadata?.full_name === "string")
+      setName(session.user.user_metadata.full_name.slice(0, 100));
+  }, [join, session?.user.user_metadata?.full_name]);
+  useEffect(() => {
     if (
       session &&
       !reset &&
