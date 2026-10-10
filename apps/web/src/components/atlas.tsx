@@ -53,6 +53,7 @@ import ChatComposer from "./chat-composer";
 import ChatHistory from "./chat-history";
 import DemoLibrary, { demoQuestions } from "./demo-library";
 import DemoChatPicker from "./demo-chat-picker";
+import KnowledgePreview from "./knowledge-preview";
 import {
   api,
   apiBase,
@@ -198,8 +199,33 @@ export default function Atlas() {
 }
 
 function Landing({ session }: { session: Session | null }) {
+  const landingRoot = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (
+      !landingRoot.current ||
+      !window.IntersectionObserver ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    const elements = landingRoot.current.querySelectorAll("[data-reveal]");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries)
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+      },
+      { threshold: 0.12 },
+    );
+    for (const element of elements) {
+      element.classList.add("reveal-enabled");
+      observer.observe(element);
+    }
+    return () => observer.disconnect();
+  }, []);
   return (
-    <div className="landing">
+    <div className="landing" ref={landingRoot}>
       <nav className="landing-nav">
         <Link href="/" aria-label="Atlas home">
           <Logo />
@@ -238,6 +264,13 @@ function Landing({ session }: { session: Session | null }) {
                 Find your next answer
                 <ArrowRight size={18} />
               </Link>
+              <Link
+                className="btn secondary"
+                href={session ? "/app" : "/signup"}
+              >
+                <Globe size={16} />
+                Explore demo companies
+              </Link>
               <a className="text-link" href="#how-it-works">
                 See how it works
                 <ChevronRight size={16} />
@@ -265,36 +298,7 @@ function Landing({ session }: { session: Session | null }) {
                   Workspace preview
                 </span>
               </div>
-              <div className="preview-query">
-                <div className="mini-avatar">Y</div>
-                <span>How do I get started on my first day?</span>
-              </div>
-              <div className="preview-answer">
-                <span className="ai-star">
-                  <Sparkles size={18} />
-                </span>
-                <div>
-                  <strong>A great first day starts here.</strong>
-                  <p>
-                    Set up your accounts, meet your team, and check your
-                    onboarding checklist. Atlas brings the relevant steps
-                    together, with a source for every answer.
-                  </p>
-                  <div className="preview-source">
-                    <FileText size={16} />
-                    <span>
-                      Onboarding handbook<span>Example source · Page 4</span>
-                    </span>
-                    <ArrowUpRight size={15} />
-                  </div>
-                </div>
-              </div>
-              <div className="preview-input">
-                <span>Ask anything about your company…</span>
-                <span>
-                  <ArrowUp size={17} />
-                </span>
-              </div>
+              <KnowledgePreview />
             </div>
             <div className="floating-file float-a">
               <span className="file-tile purple">
@@ -349,7 +353,7 @@ function Landing({ session }: { session: Session | null }) {
             <p>A familiar workspace. A much faster way to find what matters.</p>
           </div>
           <div className="feature-grid">
-            <article>
+            <article data-reveal>
               <span className="step-number">01</span>
               <UploadCloud />
               <h3>Bring your knowledge.</h3>
@@ -358,7 +362,7 @@ function Landing({ session }: { session: Session | null }) {
                 into collections your team understands.
               </p>
             </article>
-            <article>
+            <article data-reveal>
               <span className="step-number">02</span>
               <MessageSquare />
               <h3>Ask in your own words.</h3>
@@ -367,7 +371,7 @@ function Landing({ session }: { session: Session | null }) {
                 keep the conversation going.
               </p>
             </article>
-            <article>
+            <article data-reveal>
               <span className="step-number">03</span>
               <BookOpen />
               <h3>Follow the evidence.</h3>
@@ -378,7 +382,7 @@ function Landing({ session }: { session: Session | null }) {
             </article>
           </div>
         </section>
-        <section className="trust-section" id="security">
+        <section className="trust-section" id="security" data-reveal>
           <span className="trust-symbol">
             <ShieldCheck size={45} />
           </span>
@@ -910,6 +914,7 @@ function WorkspaceApp({ session }: { session: Session }) {
   const [error, setError] = useState("");
   const [view, setView] = useState("overview");
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -943,10 +948,16 @@ function WorkspaceApp({ session }: { session: Session }) {
   const router = useRouter();
   const refreshDocuments = useCallback(async () => {
     if (workspace) {
-      const rows = await api<CompanyDocument[]>(
-        `/workspaces/${workspace.id}/documents`,
-      );
-      if (currentWorkspace.current === workspace.id) setDocuments(rows);
+      try {
+        const rows = await api<CompanyDocument[]>(
+          `/workspaces/${workspace.id}/documents`,
+          { timeoutMs: 20000 },
+        );
+        if (currentWorkspace.current === workspace.id) setDocuments(rows);
+      } finally {
+        if (currentWorkspace.current === workspace.id)
+          setDocumentsLoading(false);
+      }
     }
   }, [workspace]);
   const refreshConversations = useCallback(async () => {
@@ -1001,6 +1012,7 @@ function WorkspaceApp({ session }: { session: Session }) {
     setDemoCompanyId(workspace.is_demo ? workspace.id : "");
     demoConversationIds.current = {};
     setDocuments([]);
+    setDocumentsLoading(true);
     setConversations([]);
     setCitation(null);
     setMembers([]);
@@ -1507,6 +1519,7 @@ function WorkspaceApp({ session }: { session: Session }) {
           </div>
         </header>
         <main
+          key={workspace.id + ":" + view}
           className={`workspace-content ${view === "ask" ? "chat-content" : ""}`}
         >
           {error && (
@@ -1587,23 +1600,25 @@ function WorkspaceApp({ session }: { session: Session }) {
                 <Stat
                   icon={FileText}
                   label="Documents"
-                  value={documents.length}
+                  value={documentsLoading ? "—" : documents.length}
                   detail="In your knowledge library"
                 />
                 <Stat
                   icon={Database}
                   label="Ready to search"
-                  value={ready.length}
+                  value={documentsLoading ? "—" : ready.length}
                   detail={
-                    documents.length === ready.length
-                      ? "All documents are up to date"
-                      : "Processing your latest knowledge"
+                    documentsLoading
+                      ? "Opening your indexed sources"
+                      : documents.length === ready.length
+                        ? "All documents are up to date"
+                        : "Processing your latest knowledge"
                   }
                 />
                 <Stat
                   icon={Folder}
                   label="Collections"
-                  value={collections.length}
+                  value={documentsLoading ? "—" : collections.length}
                   detail="Organized around your team"
                 />
                 <Stat
@@ -1677,7 +1692,12 @@ function WorkspaceApp({ session }: { session: Session }) {
                     <ArrowRight size={15} />
                   </button>
                 </div>
-                {documents.length ? (
+                {documentsLoading ? (
+                  <div className="library-loading" role="status">
+                    <Loader2 size={20} className="spin" />
+                    <span>Opening your knowledge library…</span>
+                  </div>
+                ) : documents.length ? (
                   <DocumentTable
                     documents={documents.slice(0, 4)}
                     admin={workspace.role === "admin"}
@@ -1782,7 +1802,11 @@ function WorkspaceApp({ session }: { session: Session }) {
                     <option key={c}>{c}</option>
                   ))}
                 </select>
-                <span>{documents.length} documents</span>
+                <span>
+                  {documentsLoading
+                    ? "Opening sources…"
+                    : `${documents.length} documents`}
+                </span>
                 <button
                   className="icon-button"
                   onClick={() =>
@@ -1795,7 +1819,12 @@ function WorkspaceApp({ session }: { session: Session }) {
                   <RotateCcw size={16} />
                 </button>
               </div>
-              {documents.length ? (
+              {documentsLoading ? (
+                <div className="library-loading" role="status">
+                  <Loader2 size={20} className="spin" />
+                  <span>Opening your knowledge library…</span>
+                </div>
+              ) : documents.length ? (
                 <DocumentTable
                   documents={documents.filter(
                     (d) =>
@@ -1930,7 +1959,7 @@ function WorkspaceApp({ session }: { session: Session }) {
                         ))}
                       </div>
                     )}
-                    {!demoCompany && !ready.length && (
+                    {!demoCompany && !documentsLoading && !ready.length && (
                       <div className="notice warning">
                         <AlertCircle size={16} />
                         Your workspace has no indexed documents yet. Add
@@ -2134,7 +2163,11 @@ function WorkspaceApp({ session }: { session: Session }) {
                         <option key={c}>{c}</option>
                       ))}
                     </select>
-                    <span>{ready.length} ready documents</span>
+                    <span>
+                      {documentsLoading
+                        ? "Opening sources…"
+                        : `${ready.length} ready documents`}
+                    </span>
                   </div>
                 )}
                 <ChatComposer
@@ -2220,7 +2253,7 @@ function Stat({
 }: {
   icon: typeof FileText;
   label: string;
-  value: number;
+  value: number | string;
   detail: string;
 }) {
   return (

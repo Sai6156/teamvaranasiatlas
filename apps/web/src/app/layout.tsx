@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./premium.css";
 export const metadata: Metadata = {
   title: "Atlas — Your company, connected.",
   description:
