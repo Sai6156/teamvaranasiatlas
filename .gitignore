@@ -13,6 +13,8 @@ __pycache__/
 test-results/
 playwright-report/
 .runtime/
+demo-data/companies/
+demo/
 *.tsbuildinfo
 supabase/.temp/
 

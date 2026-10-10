@@ -53,12 +53,13 @@ async def test_fallback_keeps_model_provider_boundaries(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_invalid_account_does_not_exhaust_routes(monkeypatch):
+@pytest.mark.parametrize("status", [401, 402, 403])
+async def test_invalid_account_does_not_exhaust_routes(monkeypatch, status):
     calls = []
 
     def handler(request):
         calls.append(request)
-        return httpx.Response(402)
+        return httpx.Response(status)
 
     original = httpx.AsyncClient
     monkeypatch.setattr(

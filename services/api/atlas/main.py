@@ -110,6 +110,13 @@ async def member(auth: Identity, org: UUID, admin=False):
         user_id="eq." + auth.user["id"],
         limit="1",
     )
+    if not rows and not admin:
+        demos = await auth.db.select(
+            "organizations", id="eq." + str(org), is_demo="eq.true",
+            demo_ready="eq.true", select="id", limit="1",
+        )
+        if demos:
+            return {"organization_id": str(org), "role": "employee", "is_demo": True}
     if not rows or (admin and rows[0]["role"] != "admin"):
         raise HTTPException(403, "You do not have access to this workspace action.")
     return rows[0]
@@ -156,14 +163,20 @@ async def workspaces(auth: Identity = Depends(identity)):
     rows = await auth.db.select(
         "memberships",
         user_id="eq." + auth.user["id"],
-        select="role,organization:organizations(id,name,created_at)",
+        select="role,organization:organizations(id,name,created_at,is_demo,demo_slug,demo_region)",
         order="created_at.asc",
     )
-    return [
+    owned = [
         {**row["organization"], "role": row["role"]}
         for row in rows
         if row.get("organization")
     ]
+    demos = await auth.db.select(
+        "organizations", is_demo="eq.true", demo_ready="eq.true",
+        select="id,name,created_at,is_demo,demo_slug,demo_region", order="demo_region.desc,name.asc",
+    )
+    known = {row["id"] for row in owned}
+    return owned + [{**row, "role": "employee"} for row in demos if row["id"] not in known]
 
 
 @app.post("/workspaces", status_code=201)
@@ -177,7 +190,9 @@ async def create_workspace(body: WorkspaceBody, auth: Identity = Depends(identit
 
 @app.get("/workspaces/{org}/members")
 async def members(org: UUID, auth: Identity = Depends(identity)):
-    await member(auth, org)
+    membership = await member(auth, org)
+    if membership.get("is_demo"):
+        return []
     return await auth.db.select(
         "memberships",
         organization_id="eq." + str(org),

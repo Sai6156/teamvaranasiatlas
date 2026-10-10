@@ -51,6 +51,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ChatComposer from "./chat-composer";
 import ChatHistory from "./chat-history";
+import DemoLibrary, { demoQuestions } from "./demo-library";
 import {
   api,
   apiBase,
@@ -903,6 +904,7 @@ function AuthView({
 function WorkspaceApp({ session }: { session: Session }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [view, setView] = useState("overview");
@@ -968,7 +970,7 @@ function WorkspaceApp({ session }: { session: Session }) {
       setWorkspaces(rows);
       setWorkspace(
         rows.find((w) => w.id === localStorage.getItem("atlas-workspace")) ||
-          rows[0] ||
+          rows.find((w) => !w.is_demo) ||
           null,
       );
     } catch (error) {
@@ -1234,6 +1236,18 @@ function WorkspaceApp({ session }: { session: Session }) {
           </button>
         </div>
       );
+  if (!workspace && !creatingWorkspace && workspaces.some((w) => w.is_demo))
+    return (
+      <DemoLibrary
+        workspaces={workspaces}
+        onSelect={(selected) => {
+          setWorkspace(selected);
+          setView("overview");
+        }}
+        onCreate={() => setCreatingWorkspace(true)}
+        onSignOut={signOut}
+      />
+    );
   if (!workspace)
     return (
       <Onboarding
@@ -1246,7 +1260,12 @@ function WorkspaceApp({ session }: { session: Session }) {
         }}
         onSignOut={signOut}
         onBack={
-          workspaces.length ? () => setWorkspace(workspaces[0]) : undefined
+          workspaces.length
+            ? () => {
+                setCreatingWorkspace(false);
+                setWorkspace(workspaces.find((w) => !w.is_demo) || null);
+              }
+            : undefined
         }
       />
     );
@@ -1273,6 +1292,7 @@ function WorkspaceApp({ session }: { session: Session }) {
             disabled={streaming}
             onChange={(e) => {
               if (e.target.value === "__new") {
+                setCreatingWorkspace(true);
                 setWorkspace(null);
                 return;
               }
@@ -1298,24 +1318,42 @@ function WorkspaceApp({ session }: { session: Session }) {
             { id: "ask", label: "Ask Atlas", icon: Sparkles },
             { id: "documents", label: "Knowledge library", icon: FolderOpen },
             { id: "team", label: "Team & access", icon: Users },
-          ].map((item) => (
-            <button
-              key={item.id}
-              className={view === item.id ? "active" : ""}
-              onClick={() => {
-                setView(item.id);
-                setMenu(false);
-                setError("");
-              }}
-            >
-              <item.icon size={18} />
-              {item.label}
-              {item.id === "documents" && (
-                <span className="nav-count">{documents.length}</span>
-              )}
-            </button>
-          ))}
+          ]
+            .filter((item) => !workspace.is_demo || item.id !== "team")
+            .map((item) => (
+              <button
+                key={item.id}
+                className={view === item.id ? "active" : ""}
+                onClick={() => {
+                  setView(item.id);
+                  setMenu(false);
+                  setError("");
+                }}
+              >
+                <item.icon size={18} />
+                {item.label}
+                {item.id === "documents" && (
+                  <span className="nav-count">{documents.length}</span>
+                )}
+              </button>
+            ))}
         </nav>
+        {workspaces.some((w) => w.is_demo) && (
+          <button
+            className="demo-library-link"
+            disabled={streaming}
+            onClick={() => {
+              setCreatingWorkspace(false);
+              setWorkspace(null);
+              setMenu(false);
+              setError("");
+            }}
+          >
+            <Globe size={17} />
+            Explore demo companies
+            <ArrowUpRight size={15} />
+          </button>
+        )}
         <div className="sidebar-section-heading">
           <span>RECENT CONVERSATIONS</span>
           <button title="New conversation" onClick={newChat}>
@@ -1364,7 +1402,12 @@ function WorkspaceApp({ session }: { session: Session }) {
           <div className="private-workspace">
             <ShieldCheck size={18} />
             <div>
-              Private workspace<small>Only your team has access</small>
+              {workspace.is_demo ? "Public company demo" : "Private workspace"}
+              <small>
+                {workspace.is_demo
+                  ? "Your conversations are private"
+                  : "Only your team has access"}
+              </small>
             </div>
           </div>
           <button className="profile" onClick={signOut} title="Sign out">
@@ -1408,7 +1451,7 @@ function WorkspaceApp({ session }: { session: Session }) {
           <div className="header-actions">
             <span className="secure-badge">
               <LockKeyhole size={12} />
-              Private & secure
+              {workspace.is_demo ? "Read-only demo" : "Private & secure"}
             </span>
             {workspace.role === "admin" && (
               <button
@@ -1437,6 +1480,15 @@ function WorkspaceApp({ session }: { session: Session }) {
               </button>
             </div>
           )}
+          {workspace.is_demo && view !== "ask" && (
+            <div className="demo-workspace-notice">
+              <Globe size={16} />
+              <span>
+                Public company publications · Indexed in advance · Cite the
+                reporting period when asking about numbers
+              </span>
+            </div>
+          )}
           {view === "overview" && (
             <>
               <div className="page-title">
@@ -1445,7 +1497,11 @@ function WorkspaceApp({ session }: { session: Session }) {
                   A little clarity, {fullName.split(" ")[0]}
                   <span className="title-dot">.</span>
                 </h1>
-                <p>Everything your team knows. One place to find it.</p>
+                <p>
+                  {workspace.is_demo
+                    ? `Explore ${workspace.name} through its public reports, with original source references.`
+                    : "Everything your team knows. One place to find it."}
+                </p>
               </div>
               <section className="ask-banner">
                 <div className="banner-grid" />
@@ -1510,9 +1566,20 @@ function WorkspaceApp({ session }: { session: Session }) {
                 />
                 <Stat
                   icon={Users}
-                  label="Team members"
-                  value={members.length}
-                  detail="Connected to this workspace"
+                  label={workspace.is_demo ? "Source pages" : "Team members"}
+                  value={
+                    workspace.is_demo
+                      ? documents.reduce(
+                          (sum, doc) => sum + (doc.total_pages || 0),
+                          0,
+                        )
+                      : members.length
+                  }
+                  detail={
+                    workspace.is_demo
+                      ? "Indexed before your visit"
+                      : "Connected to this workspace"
+                  }
                 />
               </div>
               <section className="workspace-section">
@@ -1524,7 +1591,20 @@ function WorkspaceApp({ session }: { session: Session }) {
                   <span className="muted-badge">MADE FOR YOUR EVERYDAY</span>
                 </div>
                 <div className="suggestion-grid">
-                  {suggested.map((item) => (
+                  {(workspace.is_demo
+                    ? (demoQuestions[workspace.demo_slug || ""] || []).map(
+                        (question, index) => ({
+                          ...suggested[index],
+                          label: [
+                            "Financial performance",
+                            "Business & strategy",
+                            "Reports & governance",
+                          ][index],
+                          question,
+                        }),
+                      )
+                    : suggested
+                  ).map((item) => (
                     <button
                       key={item.label}
                       className="suggestion-card"
@@ -1791,12 +1871,22 @@ function WorkspaceApp({ session }: { session: Session }) {
                     </span>
                     <h1>Let’s connect the dots.</h1>
                     <p>
-                      Ask about a policy, a process, or a piece of code.
+                      {workspace.is_demo
+                        ? `Ask about ${workspace.name}’s performance, strategy or reports.`
+                        : "Ask about a policy, a process, or a piece of code."}
                       <br />
                       I’ll find the relevant knowledge and show my sources.
                     </p>
                     <div className="chat-suggestions">
-                      {suggested.map((s) => (
+                      {(workspace.is_demo
+                        ? (demoQuestions[workspace.demo_slug || ""] || []).map(
+                            (question, index) => ({
+                              ...suggested[index],
+                              question,
+                            }),
+                          )
+                        : suggested
+                      ).map((s) => (
                         <button key={s.label} onClick={() => ask(s.question)}>
                           <s.icon size={17} />
                           {s.question}
@@ -2583,7 +2673,12 @@ function SourceDrawer({
       const source = await api<{ url: string }>(
         `/documents/${citation.document_id}/source`,
       );
-      window.open(source.url, "_blank", "noopener,noreferrer");
+      window.open(
+        source.url +
+          (citation.location.page ? `#page=${citation.location.page}` : ""),
+        "_blank",
+        "noopener,noreferrer",
+      );
     } catch (error) {
       setError(errorText(error));
     } finally {
@@ -2655,6 +2750,17 @@ function SourceDrawer({
           Access is checked again before opening the original. Download links
           expire after two minutes.
         </p>
+        {citation.location.source_url?.startsWith("https://") && (
+          <a
+            className="btn secondary full"
+            href={citation.location.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink size={16} />
+            Visit publisher source
+          </a>
+        )}
       </aside>
     </div>
   );

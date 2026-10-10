@@ -97,6 +97,9 @@ export type Workspace = {
   id: string;
   name: string;
   role: "admin" | "employee";
+  is_demo?: boolean;
+  demo_slug?: string;
+  demo_region?: "India" | "Global";
 };
 export type CompanyDocument = {
   id: string;
@@ -121,7 +124,14 @@ export type Citation = {
   document_id: string;
   document_name: string;
   content: string;
-  location: { label: string; page?: number; kind?: string };
+  location: {
+    label: string;
+    page?: number;
+    kind?: string;
+    source_url?: string;
+    original_page?: number;
+    original_document?: string;
+  };
   collection: string;
 };
 export type Message = {

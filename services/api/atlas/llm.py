@@ -67,9 +67,9 @@ async def embed(texts: list[str]) -> list[list[float]]:
                     "provider": {"data_collection": config.openrouter_data_collection},
                 },
             )
-            if result.status_code in (401, 402):
+            if result.status_code in (401, 402, 403):
                 raise ConfigurationError(
-                    "The AI account key or balance needs attention."
+                    "The AI account key, spending limit or balance needs attention."
                 )
             if result.status_code in (429, 500, 502, 503, 504):
                 await asyncio.sleep(min(2**attempt, 4))
@@ -153,9 +153,9 @@ async def generate(
                             model, providers, messages, True, max_tokens
                         ),
                     ) as response:
-                        if response.status_code in (401, 402):
+                        if response.status_code in (401, 402, 403):
                             raise ConfigurationError(
-                                "The AI account key or balance needs attention."
+                                "The AI account key, spending limit or balance needs attention."
                             )
                         if response.status_code in (400, 422):
                             raise ConfigurationError(

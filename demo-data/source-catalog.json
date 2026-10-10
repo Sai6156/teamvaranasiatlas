@@ -1,0 +1,346 @@
+{
+  "dataset": "Atlas Public Company Demo Library",
+  "version": "local-demo-v1",
+  "companies": [
+    {
+      "slug": "reliance",
+      "name": "Reliance Industries",
+      "region": "India",
+      "documents": [
+        {
+          "slug": "annual-report",
+          "title": "Integrated Annual Report 2024–25",
+          "period": "FY 2024–25",
+          "path": "demo\\prepared\\reliance\\annual-report.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 147
+        },
+        {
+          "slug": "fy2025-q4-results",
+          "title": "Q4 and FY2025 Financial Results",
+          "period": "FY2025 Q4",
+          "path": "demo\\prepared\\reliance\\fy2025-q4-results.pdf",
+          "source_url": "https://rilstaticasset.akamaized.net/sites/default/files/2025-04/25042025_Media_Release_RIL_Q4_FY2024_25_Financial_and_Operational_Performance.pdf",
+          "collection": "Financials",
+          "pages": 44
+        },
+        {
+          "slug": "code-of-conduct",
+          "title": "Code of Conduct",
+          "period": "Policy snapshot",
+          "path": "demo\\prepared\\reliance\\code-of-conduct.pdf",
+          "source_url": "https://rilstaticasset.akamaized.net/sites/default/files/2023-01/Code-of-Conduct.pdf",
+          "collection": "Governance",
+          "pages": 19
+        }
+      ]
+    },
+    {
+      "slug": "tcs",
+      "name": "TCS",
+      "region": "India",
+      "documents": [
+        {
+          "slug": "annual-report-part-1",
+          "title": "Annual Report FY 2025–26 — Part 1 of 3 (pages 1–120)",
+          "period": "FY 2025–26",
+          "path": "demo\\prepared\\tcs\\annual-report-part-1.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 120
+        },
+        {
+          "slug": "annual-report-part-2",
+          "title": "Annual Report FY 2025–26 — Part 2 of 3 (pages 121–240)",
+          "period": "FY 2025–26",
+          "path": "demo\\prepared\\tcs\\annual-report-part-2.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 120
+        },
+        {
+          "slug": "annual-report-part-3",
+          "title": "Annual Report FY 2025–26 — Part 3 of 3 (pages 241–360)",
+          "period": "FY 2025–26",
+          "path": "demo\\prepared\\tcs\\annual-report-part-3.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 120
+        }
+      ]
+    },
+    {
+      "slug": "infosys",
+      "name": "Infosys",
+      "region": "India",
+      "documents": [
+        {
+          "slug": "annual-report-part-1",
+          "title": "Annual Report FY 2024–25 — Part 1 of 3 (pages 1–123)",
+          "period": "FY 2024–25",
+          "path": "demo\\prepared\\infosys\\annual-report-part-1.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 123
+        },
+        {
+          "slug": "annual-report-part-2",
+          "title": "Annual Report FY 2024–25 — Part 2 of 3 (pages 124–246)",
+          "period": "FY 2024–25",
+          "path": "demo\\prepared\\infosys\\annual-report-part-2.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 123
+        },
+        {
+          "slug": "annual-report-part-3",
+          "title": "Annual Report FY 2024–25 — Part 3 of 3 (pages 247–369)",
+          "period": "FY 2024–25",
+          "path": "demo\\prepared\\infosys\\annual-report-part-3.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 123
+        }
+      ]
+    },
+    {
+      "slug": "wipro",
+      "name": "Wipro",
+      "region": "India",
+      "documents": [
+        {
+          "slug": "annual-report",
+          "title": "Integrated Annual Report 2025–26",
+          "period": "FY 2025–26",
+          "path": "demo\\prepared\\wipro\\annual-report.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 548
+        },
+        {
+          "slug": "fy2025-q4-results",
+          "title": "Q4 and FY2025 Financial Results",
+          "period": "FY2025 Q4",
+          "path": "demo\\prepared\\wipro\\fy2025-q4-results.pdf",
+          "source_url": "https://www.wipro.com/content/dam/nexus/en/investor/quarterly-results/2024-2025/q4fy25/press-release-q4fy25.pdf",
+          "collection": "Financials",
+          "pages": 13
+        },
+        {
+          "slug": "code-of-conduct",
+          "title": "Code of Business Conduct and Ethics",
+          "period": "Policy snapshot",
+          "path": "demo\\prepared\\wipro\\code-of-conduct.pdf",
+          "source_url": "https://www.wipro.com/content/dam/nexus/en/investor/corporate-governance/policies-and-guidelines/ethical-guidelines/code-of-business-conduct-and-ethics.pdf",
+          "collection": "Governance",
+          "pages": 36
+        }
+      ]
+    },
+    {
+      "slug": "hcltech",
+      "name": "HCLTech",
+      "region": "India",
+      "documents": [
+        {
+          "slug": "annual-report",
+          "title": "Integrated Annual Report 2025–26",
+          "period": "FY 2025–26",
+          "path": "demo\\prepared\\hcltech\\annual-report.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 462
+        },
+        {
+          "slug": "fy2025-q4-results",
+          "title": "Q4 and FY2025 Investor Release",
+          "period": "FY2025 Q4",
+          "path": "demo\\prepared\\hcltech\\fy2025-q4-results.pdf",
+          "source_url": "https://www.hcltech.com/sites/default/files/en/investors/3098/investorrelease.pdf",
+          "collection": "Financials",
+          "pages": 40
+        },
+        {
+          "slug": "code-of-conduct",
+          "title": "Global Code of Business Ethics and Conduct",
+          "period": "May 2025 edition",
+          "path": "demo\\prepared\\hcltech\\code-of-conduct.pdf",
+          "source_url": "https://www.hcltech.com/sites/default/files/documents/resources/pdf-landing-page/files/2025/12/17/Code-of-business-Ethics-and-Conduct-Global-13-05-2025.pdf",
+          "collection": "Governance",
+          "pages": 33
+        }
+      ]
+    },
+    {
+      "slug": "microsoft",
+      "name": "Microsoft",
+      "region": "Global",
+      "documents": [
+        {
+          "slug": "annual-report",
+          "title": "Annual Report 2025",
+          "period": "FY 2025",
+          "path": "demo\\prepared\\microsoft\\annual-report.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 63
+        },
+        {
+          "slug": "fy2025-q4-results",
+          "title": "Q4 and FY2025 Earnings Release",
+          "period": "FY2025 Q4",
+          "path": "demo\\prepared\\microsoft\\fy2025-q4-results.html",
+          "source_url": "https://www.microsoft.com/en-us/Investor/earnings/FY-2025-Q4/press-release-webcast",
+          "collection": "Financials",
+          "pages": 0
+        },
+        {
+          "slug": "trust-code",
+          "title": "Standards of Business Conduct â€” Trust Code",
+          "period": "Policy snapshot",
+          "path": "demo\\prepared\\microsoft\\trust-code.pdf",
+          "source_url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/mscle/documents/presentations/English%20-%20Trust%20Code%20%28SBC%29%20PDF.pdf",
+          "collection": "Governance",
+          "pages": 53
+        }
+      ]
+    },
+    {
+      "slug": "apple",
+      "name": "Apple",
+      "region": "Global",
+      "documents": [
+        {
+          "slug": "fy2026-financial-statements",
+          "title": "FY 2026 Q1, Q2 and Q3 Financial Statements",
+          "period": "FY 2026 Q1–Q3 (separate quarters)",
+          "path": "demo\\prepared\\apple\\fy2026-financial-statements.pdf",
+          "source_url": null,
+          "collection": "Financials",
+          "pages": 9
+        },
+        {
+          "slug": "environmental-report-part-1",
+          "title": "Environmental Progress Report 2025 — Part 1 of 2 (pages 1–63)",
+          "period": "Published 2025, reporting FY 2024",
+          "path": "demo\\prepared\\apple\\environmental-report-part-1.pdf",
+          "source_url": null,
+          "collection": "Sustainability",
+          "pages": 63
+        },
+        {
+          "slug": "environmental-report-part-2",
+          "title": "Environmental Progress Report 2025 — Part 2 of 2 (pages 64–126)",
+          "period": "Published 2025, reporting FY 2024",
+          "path": "demo\\prepared\\apple\\environmental-report-part-2.pdf",
+          "source_url": null,
+          "collection": "Sustainability",
+          "pages": 63
+        }
+      ]
+    },
+    {
+      "slug": "nvidia",
+      "name": "NVIDIA",
+      "region": "Global",
+      "documents": [
+        {
+          "slug": "annual-report",
+          "title": "Annual Report and Proxy 2026",
+          "period": "FY 2026",
+          "path": "demo\\prepared\\nvidia\\annual-report.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 175
+        },
+        {
+          "slug": "fy2025-q4-results",
+          "title": "Q4 and FY2025 Financial Results",
+          "period": "FY2025 Q4",
+          "path": "demo\\prepared\\nvidia\\fy2025-q4-results.html",
+          "source_url": "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2025",
+          "collection": "Financials",
+          "pages": 0
+        },
+        {
+          "slug": "finance-team-code",
+          "title": "Finance Team Code of Conduct",
+          "period": "June 2023 edition",
+          "path": "demo\\prepared\\nvidia\\finance-team-code.pdf",
+          "source_url": "https://s201.q4cdn.com/141608511/files/doc_governance/2023/06/NVIDIA-Finance-Team-Code-of-Conduct.pdf",
+          "collection": "Governance",
+          "pages": 2
+        }
+      ]
+    },
+    {
+      "slug": "amazon",
+      "name": "Amazon",
+      "region": "Global",
+      "documents": [
+        {
+          "slug": "annual-report",
+          "title": "Annual Report 2025",
+          "period": "Calendar 2025",
+          "path": "demo\\prepared\\amazon\\annual-report.pdf",
+          "source_url": null,
+          "collection": "Reports",
+          "pages": 92
+        },
+        {
+          "slug": "2025-q4-results",
+          "title": "Fourth Quarter and Full Year 2025 Results",
+          "period": "Calendar 2025 Q4",
+          "path": "demo\\prepared\\amazon\\2025-q4-results.html",
+          "source_url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-Fourth-Quarter-Results/default.aspx",
+          "collection": "Financials",
+          "pages": 0
+        },
+        {
+          "slug": "code-of-conduct",
+          "title": "Code of Business Conduct and Ethics",
+          "period": "Policy snapshot",
+          "path": "demo\\prepared\\amazon\\code-of-conduct.html",
+          "source_url": "https://ir.aboutamazon.com/corporate-governance/documents-and-charters/code-of-business-conduct-and-ethics/default.aspx",
+          "collection": "Governance",
+          "pages": 0
+        }
+      ]
+    },
+    {
+      "slug": "alphabet",
+      "name": "Alphabet",
+      "region": "Global",
+      "documents": [
+        {
+          "slug": "environmental-report-part-1",
+          "title": "Google Environmental Report 2026 — Part 1 of 2 (pages 1–58)",
+          "period": "Published 2026",
+          "path": "demo\\prepared\\alphabet\\environmental-report-part-1.pdf",
+          "source_url": null,
+          "collection": "Sustainability",
+          "pages": 58
+        },
+        {
+          "slug": "environmental-report-part-2",
+          "title": "Google Environmental Report 2026 — Part 2 of 2 (pages 59–117)",
+          "period": "Published 2026",
+          "path": "demo\\prepared\\alphabet\\environmental-report-part-2.pdf",
+          "source_url": null,
+          "collection": "Sustainability",
+          "pages": 59
+        },
+        {
+          "slug": "2026-q1-results",
+          "title": "Alphabet First Quarter 2026 Results",
+          "period": "Calendar 2026 Q1",
+          "path": "demo\\prepared\\alphabet\\2026-q1-results.pdf",
+          "source_url": null,
+          "collection": "Financials",
+          "pages": 9
+        }
+      ]
+    }
+  ]
+}
