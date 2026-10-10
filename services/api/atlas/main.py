@@ -29,7 +29,7 @@ from .config import settings
 from .db import Database
 from .extraction import SUPPORTED_EXTENSIONS
 from .llm import ConfigurationError, ModelUnavailable, generate
-from .grounding import citation_support, abstention
+from .grounding import citation_support, abstention, disclosed_column_totals
 from .retrieval import retrieve
 from .batch_answer import answer_batch
 
@@ -586,7 +586,12 @@ async def chat(
                     elif item["type"] == "model":
                         model = item["model"]
                     yield event(item)
-                corrected, supported = citation_support(answer, sources)
+                with_totals = (
+                    disclosed_column_totals(answer, body.question, sources)
+                    if len(queries) <= 3
+                    else answer
+                )
+                corrected, supported = citation_support(with_totals, sources)
                 refusal = abstention(answer)
                 if refusal:
                     corrected, sources, supported = refusal, [], True

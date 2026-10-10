@@ -150,6 +150,25 @@ async def retrieve(
         *(search(query, vector) for query, vector in zip(queries, vectors))
     )
     selected = {}
+    if len(queries) > 3:
+        for query_index, rows in enumerate(ranked):
+            characters = 0
+            for position, source in enumerate(rows[:12]):
+                if position >= 8 and characters + len(source["content"]) > 65000:
+                    continue
+                characters += len(source["content"])
+                if source["id"] not in selected:
+                    selected[source["id"]] = {**source, "query_ranks": {}}
+                selected[source["id"]]["query_ranks"][str(query_index)] = position
+        sources = list(selected.values())
+        for index, source in enumerate(sources):
+            source["number"] = index + 1
+            source["location"] = {
+                key: value
+                for key, value in source["location"].items()
+                if key != "table_header"
+            }
+        return sources, queries
     protected = []
     # Reserve evidence for every requested subquestion before global ranking.
     minimum = 6 if len(queries) > 3 else 2 if len(queries) > 1 else 8

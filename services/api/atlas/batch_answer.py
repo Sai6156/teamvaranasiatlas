@@ -3,14 +3,20 @@
 import asyncio
 from .llm import generate
 from .retrieval import rank
+from .grounding import disclosed_column_totals
 
 
 async def answer_batch(system: str, queries: list[str], sources: list[dict]):
     gate = asyncio.Semaphore(3)
     tasks = []
 
-    async def solve(query):
-        relevant = rank(query, sources)[:8]
+    async def solve(query, index):
+        relevant = [
+            source for source in sources if str(index) in source.get("query_ranks", {})
+        ]
+        relevant.sort(key=lambda source: source["query_ranks"][str(index)])
+        if not relevant:
+            relevant = rank(query, sources)[:12]
         evidence = "\n\n".join(
             f"[{source['number']}] {source['document_name']} · {source['location'].get('label', 'Source')}\n{source['content']}"
             for source in relevant
@@ -34,10 +40,13 @@ async def answer_batch(system: str, queries: list[str], sources: list[dict]):
                     text += item["text"]
                 elif item["type"] == "model":
                     model = item["model"]
-        return text, model
+        return disclosed_column_totals(text, query, relevant), model
 
     try:
-        tasks = [asyncio.create_task(solve(query)) for query in queries]
+        tasks = [
+            asyncio.create_task(solve(query, index))
+            for index, query in enumerate(queries)
+        ]
         for index, task in enumerate(tasks):
             yield {
                 "type": "status",

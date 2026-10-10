@@ -54,6 +54,76 @@ def citation_support(answer: str, sources: list[dict]) -> tuple[str, bool]:
     return re.sub(r"\[(\d+)\]", replace, answer), valid
 
 
+def disclosed_column_totals(answer: str, question: str, sources: list[dict]) -> str:
+    """Compute requested category sums only from exact, source-verified rows."""
+    if not re.search(r"\b(?:total|totals|overall|combined)\b", question, re.I):
+        return answer
+    lines = answer.splitlines()
+    for index, line in enumerate(lines):
+        if not line.strip().startswith("|"):
+            continue
+        headers = [
+            re.sub(r"[*`]", "", cell).strip()
+            for cell in line.strip().strip("|").split("|")
+        ]
+        if not headers or headers[0].lower() not in ("location", "region", "geography"):
+            continue
+        if any(re.search(r"fy|year|rate|percent", header, re.I) for header in headers):
+            continue
+        rows = []
+        for data_line in lines[index + 2 :]:
+            if not data_line.strip().startswith("|"):
+                break
+            cells = [
+                re.sub(r"[*`]", "", cell).strip()
+                for cell in data_line.strip().strip("|").split("|")
+            ]
+            if len(cells) != len(headers) or not all(
+                re.fullmatch(r"[\d,]+", cell) for cell in cells[1:]
+            ):
+                break
+            rows.append(cells)
+        if len(rows) < 2 or {row[0].lower() for row in rows} not in (
+            {"national", "international"},
+            {"domestic", "international"},
+        ):
+            continue
+        witness = None
+        for source in sources:
+            plain = re.sub(r"\s+", " ", source["content"]).lower()
+            if all(
+                re.search(
+                    r"\b"
+                    + re.escape(row[0].lower())
+                    + r"\s+"
+                    + r"\s+".join(re.escape(cell) for cell in row[1:])
+                    + r"\b",
+                    plain,
+                )
+                for row in rows
+            ):
+                witness = source
+                break
+        if witness is None:
+            continue
+        totals = []
+        for column, header in enumerate(headers[1:], 1):
+            if header.lower() == "total":
+                continue
+            values = [int(row[column].replace(",", "")) for row in rows]
+            totals.append(
+                f"**{header}: {' + '.join(str(value) for value in values)} = {sum(values):,}**"
+            )
+        if totals:
+            return (
+                answer
+                + "\n\nDerived totals across the disclosed locations: "
+                + "; ".join(totals)
+                + f" [{witness['number']}]."
+            )
+    return answer
+
+
 def abstention(answer: str) -> str | None:
     beginning = answer.strip()
     if re.match(
