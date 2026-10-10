@@ -109,7 +109,7 @@ async def main():
                 print(json.dumps({"company": company["slug"], "document": doc["slug"], "status": "failed", "error": item["error"]}), flush=True)
             results.append(item)
             MANIFEST.write_text(json.dumps({"dataset": catalog["dataset"], "documents": sorted(results, key=lambda d: (d["company_slug"], d["slug"]))}, ensure_ascii=False, indent=2), encoding="utf-8")
-        await asyncio.gather(*(download(company, doc) for company in catalog["companies"] for doc in company["documents"]))
+        await asyncio.gather(*(download(company, {**doc, "url": doc.get("url") or doc["source_url"]}) for company in catalog["companies"] for doc in company["documents"] if doc.get("url") or doc.get("source_url")))
     print(json.dumps({"verified": sum(d["status"] == "verified" for d in results), "total": len(results)}), flush=True)
 
 

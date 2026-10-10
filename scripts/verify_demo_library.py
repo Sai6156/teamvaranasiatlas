@@ -19,6 +19,12 @@ STATE = ROOT / ".runtime/demo-qa.json"
 async def main():
     state = json.loads(STATE.read_text())
     judge, outsider = state["users"]
+    async with httpx.AsyncClient(timeout=30, transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0")) as client:
+        for user in state["users"]:
+            login = await client.post(CONFIG.supabase_url + "/auth/v1/token?grant_type=password", headers={"apikey": CONFIG.supabase_publishable_key}, json={"email": user["email"], "password": user["password"]})
+            login.raise_for_status()
+            user["session"] = login.json()
+    STATE.write_text(json.dumps(state))
     auth = {"Authorization": "Bearer " + judge["session"]["access_token"]}
     other = {"Authorization": "Bearer " + outsider["session"]["access_token"]}
     public = {"apikey": CONFIG.supabase_publishable_key, **auth}
@@ -44,7 +50,10 @@ async def main():
                     r.raise_for_status()
                     source = await client.head(r.json()["url"])
                     source.raise_for_status()
-                    assert int(source.headers.get("content-length", "0")) > 0
+                    if not int(source.headers.get("content-length", "0")):
+                        async with client.stream("GET", r.json()["url"], headers={"Range": "bytes=0-127"}) as body:
+                            body.raise_for_status()
+                            assert await anext(body.aiter_bytes())
                 row = {"company": w["name"], "documents": 3, "source_links": "verified"}
                 results.append(row)
                 print(json.dumps(row), flush=True)
