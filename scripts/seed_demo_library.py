@@ -31,7 +31,13 @@ async def main():
         async def request(method, path, **kwargs):
             headers = {**admin, **kwargs.pop("headers", {})}
             for attempt in range(4):
-                response = await client.request(method, CONFIG.supabase_url + path, headers=headers, **kwargs)
+                try:
+                    response = await client.request(method, CONFIG.supabase_url + path, headers=headers, **kwargs)
+                except httpx.TransportError:
+                    if attempt == 3:
+                        raise
+                    await asyncio.sleep(2 ** attempt)
+                    continue
                 if response.status_code in (429, 500, 502, 503, 504) and attempt < 3:
                     await asyncio.sleep(2 ** attempt)
                     continue
@@ -67,7 +73,9 @@ async def main():
                 storage = f"{org}/{docid}/original"
                 data = (ROOT / doc["path"]).read_bytes()
                 assert hashlib.sha256(data).hexdigest() == doc["sha256"]
-                await request("POST", "/storage/v1/object/company-documents/" + storage, content=data, headers={"Content-Type": doc["mime_type"], "x-upsert": "true"})
+                # Metadata is created only after the source upload completes.
+                if not old:
+                    await request("POST", "/storage/v1/object/company-documents/" + storage, content=data, headers={"Content-Type": doc["mime_type"], "x-upsert": "true"})
                 if not old:
                     await request("POST", "/rest/v1/documents", json={"id": docid, "organization_id": org, "uploaded_by": owner["id"], "name": doc["title"] + (".pdf" if doc["pages"] else ".html"), "mime_type": doc["mime_type"], "size_bytes": doc["bytes"], "content_hash": doc["sha256"], "storage_path": storage, "collection": doc["collection"], "status": "embedding", "total_pages": doc["pages"], "processed_pages": doc["pages"], "index_total_chunks": doc["chunks"], "index_completed_chunks": 0, "indexing_version": "local-demo-v1", "extraction_note": doc["extraction_note"]})
                 if "--stage-only" in sys.argv:
