@@ -1,22 +1,31 @@
+# Credentials and local configuration
 secrets.env
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
+!secrets.env.example
+
+# Dependencies and generated builds
 node_modules/
 .next/
 .venv/
 __pycache__/
 .pytest_cache/
+.ruff_cache/
 *.pyc
 *.log
-.vercel/
-test-results/
-playwright-report/
-.runtime/
-demo-data/companies/
-demo/
 *.tsbuildinfo
+.vercel/
 supabase/.temp/
 
-.vercel
-.env*
+# Local diagnostics and large datasets
+.runtime/
+test-results/
+playwright-report/
+demo/
+demo-data/companies/
+demo-data/seed-status.json
+apps/web/AGENTS.md

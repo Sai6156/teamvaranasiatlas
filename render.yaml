@@ -16,6 +16,14 @@ services:
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
+      - key: OPENROUTER_FREE_API_KEY
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        value: Atlas
       - key: FRONTEND_URL
         sync: false
       - key: ALLOWED_ORIGINS

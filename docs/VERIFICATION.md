@@ -1,72 +1,31 @@
-# Release verification — October 10, 2026
+# Verification
 
-Application: https://atlas-varanasi.vercel.app
+## Reproducible checks
 
-API readiness: https://atlas-varanasi-api.onrender.com/health/ready
+```bash
+python -m pytest
+npm run build
+npm run typecheck
+```
 
-Repository: https://github.com/Sai6156/teamvaranasiatlas
+The current baseline has 51 passing backend tests covering extraction, archive limits, isolated parsing, authorization, invitations/email codes, retrieval, grounding, and model/key routing. Frontend production build and TypeScript checks pass. CI repeats these checks without production credentials.
 
-## Workspace loading recovery
+`scripts/live_verify.py` and `scripts/cleanup_qa.py` support explicit integration testing on a dedicated project. Live checks create accounts/workspaces and may send email or consume API credit; they are not part of CI.
 
-The frontend loading fix is live on commit `aa51700`, Vercel deployment `dpl_4uKafrNsknxZYSbP9VEbjBRo8ga2`. The backend extraction isolation and aligned-text fallback run on commit `aab9e1a`.
+## Observed live checks
 
-Production logs and metrics showed a PDF extraction job consuming the API's CPU quota and approaching the 512 MB hosting memory limit, while its lease heartbeat and page progress stalled. Readiness and workspace requests timed out, although Supabase Auth and the database responded normally. Restarting with the indexer temporarily disabled restored requests. Indexing is now enabled again, with native parsing and chunking performed in a disposable, lower-priority child process. Its memory is monitored and cancellation terminates the child and its OCR process group. Native PDF caches are released between pages. PDFs that exceed geometric extraction memory retry with native text and aligned source columns; the page coverage and fallback mode are disclosed in document metadata.
+- Ten public demo companies with three indexed files each and original-source links.
+- Organization isolation, employee write denial, private conversations, and authenticated source access.
+- Brevo signup/recovery codes and email-bound invitations.
+- Desktop/mobile navigation, compact short-screen chat, evidence previews, and reduced-motion support.
+- Separate-key free fallback with the primary key exhausted. Apodex returned answers; Nemotron could not route under the account's free-model data policy.
 
-Workspace discovery has a 20-second deadline, cancellation of superseded requests, and an explicit retry/sign-out screen. A failed discovery no longer sends an existing user to new-workspace onboarding. Session retrieval/refresh also has a deadline; other API calls are bounded without limiting answer streams.
+These checks are individual observations, not uptime or latency guarantees.
 
-Live isolated browser verification: a returning account opened its workspace in 4.01 seconds; a persisted-session reload completed in 3.21 seconds. A deliberately stalled workspace request displayed recovery after 21.30 seconds including page-load time, and Retry opened the workspace in 3.95 seconds. A simulated HTTP 503 also displayed recovery without duplicate onboarding. These are individual observations, not latency guarantees. The production frontend build and TypeScript checks passed. The 40-test backend suite passed, and the subsequent subprocess page-progress regression passed with all five parser-isolation tests.
+## Answer-quality review
 
-## Email-code rollout — live
+A targeted 20-question review across all ten companies compared answers with returned passages and independently recomputed arithmetic. Every request completed without API errors on the free fallback: 10 passes, 8 partial results, and 2 material failures.
 
-The email-code signup/reset screens and direct Brevo invitation delivery are deployed. Render runs backend commit `fc762a4`; Vercel runs frontend commit `2479b42` (deployment `dpl_BCosvpRmgf4YdUDSGf2QVDZhbZ7H`). The verified sender is configured server-side, and Render's two outbound ranges have been authorized in Brevo. Credentials remain outside the repository and browser bundle.
+Partial results involved rounding, citation alignment, reporting-basis ambiguity, unsupported explanations, and contradictory statements about evidence. Material failures substituted the wrong HCLTech revenue classification and labeled Alphabet quarterly revenue as a full-year result.
 
-The frontend production build and TypeScript checks pass, and 36 backend tests pass. A regression against the real Supabase project (capturing outbound email locally) verified: signup cannot log in before confirmation; invalid and reused codes fail; requesting another email within 60 seconds fails; an invitation cannot be accepted by another email or replayed; the correct invitee receives employee access; and recovery changes the password, rejecting the old one. Supabase currently generates eight-digit email codes for this project.
-
-The public Render API successfully sent signup and invitation emails through Brevo. An isolated headless browser tested the actual production frontend with temporary accounts using the owner's Gmail aliases: an invitation email link opens the correct join page and preserves the invited address; signup accepts the emailed code and rejects an incorrect code; the verified teammate joins as an employee; password recovery accepts the emailed code and opens the new-password form; the new password logs in and the old password is rejected. The teammate's verified name is prefilled on the invitation page. Brevo's transactional logs report delivery for signup, invitation, and reset emails. The code-entry screen was visually inspected. All temporary sessions were revoked and both temporary accounts and the empty workspace were removed, preserving the original user and company data. Private QA evidence remains in ignored `.runtime/`.
-
-New users follow invitation link → signup → email code → accept workspace. Existing verified users follow invitation link → password login → accept workspace. Invitations retain their email binding, seven-day expiry, and single-use behavior.
-
-## Large-report and conversation update
-
-The frontend changes are deployed on Vercel. Render is live on application commit `0f9790da6709ce3f28b25e3ff6e2ea8bbc556b96`.
-
-Both original Reliance uploads were completely reindexed on the deployed worker: the BRSR has 51 physical PDF pages and 300 chunks; the integrated annual report has 146 physical pages and 1,340 chunks. Every physical page is represented. Double-page spreads retain their printed page labels. There is no combined 100-page cutoff. Native text and structured tables are extracted with PyMuPDF; scanned pages use OCR. Indexing progress is visible per document.
-
-The deployed API was evaluated against isolated copies of both full reports, including every chunk and vector. Expected answers were used only as test oracles, never injected into retrieval or model prompts. All ten individual responses passed their requested-field checks. The combined ten-question response completed in 49.16 seconds with every requested substantive field, after manual source review:
-
-| Question | Verified result |
-|---|---|
-| Largest product/service | Exact petroleum-product description; NIC 19201; 65.02% |
-| Related parties | Purchases 40.77%; sales 57.02%; investments 64.87% |
-| ESG investment | R&D 36.64%; capex 63.36% |
-| Payables | FY2024-25: 101 days; FY2023-24: 100 days |
-| Differently abled | Employees 13; workers 24; requested combined count 37; female 2 |
-| Safety | Recordable injuries 14 employees / 31 workers; high-consequence injuries 0 / 0 |
-| ESG committee | Hital R. Meswani, chairman/executive; P. M. S. Prasad, member/executive; Arundhati Bhattacharya, member/independent |
-| Female turnover | Employees 18%, 19%, 20%; workers 25%, 21%, 12%, in the requested year order |
-| Plastics and POY | Recycled 29,464 MT; safely disposed 33,400 MT; POY reclaimed 73% |
-| Locations and exports | Plants 15 national + 0 international = 15; offices 62 + 2 = 64; 108 export countries |
-
-Source-spelling caveat: the BRSR itself prints “Arundhati Bhattacharaya.” The combined answer faithfully uses that spelling; the standalone answer uses “Bhattacharya.” The original strict spelling oracle therefore scored the combined response 9/10. The documented source-supported spelling exception scores it 10/10 substantive responses; it does not modify production answers. This is a fixed ten-question regression, not a general accuracy guarantee. Individual complete-response times were 13.41–23.47 seconds in this run; free hosting cold starts and provider latency can add time.
-
-Production browser checks used 22 conversations: every conversation was accessible through the scrollable sidebar and searchable history, and searching/selecting an older conversation worked. An 8,302-character, 90-line draft was preserved between the inline and expanded editors. Ctrl+Home/Ctrl+End navigated the complete draft, and clipboard readback exactly matched the full draft, including its final marker.
-
-The updated production frontend build and TypeScript checks passed. All 32 backend tests passed, including per-question evidence preservation, bounded batch concurrency, complete PDF extraction, and source-verified category totals. Temporary verification workspaces and accounts are removed after retaining private local evidence. The original company workspace and both uploaded reports are preserved.
-
-## Earlier release checks
-
-- Production Next.js build and TypeScript checks passed; production frontend dependencies report zero known vulnerabilities in the npm audit performed for this release.
-- 22 Python tests passed, covering supported format extraction, archive limits/traversal, authentication guards, model/provider failover, partial-stream failure, short-heading citation mismatch, and concise abstention.
-- Live synthetic tests passed against the public Render API: authenticated workspace creation, email-bound invitation acceptance, employee upload denial, cross-organization document/source denial, duplicate detection, four indexed formats, authorized signed download, private conversations, and a two-document answer using GLM 5.3 Flash.
-- The five-file fictional quickstart pack indexed successfully, including a PDF, DOCX, CSV, Markdown, and Python source. Live PNG OCR and image-only PDF OCR also passed with the local worker stopped, verifying the Render processing path. Last-admin removal and employee privilege escalation were denied.
-- A real account was email-confirmed, a real user workspace was created, and its five example files reached ready status with no failures. User passwords and document contents were not printed for this check.
-- Production browser QA confirmed login, workspace data, streaming responses, citation cards, and the exact PDF passage drawer.
-- An observed multi-turn error linked a production-access claim to an onboarding heading. Historical assistant citation numbers are no longer reused as evidence; a conservative short-heading consistency guard was added. The live regression now cites the engineering passage, and an unsupported growth-rate question abstains without unrelated source cards.
-
-Timing samples: the two-document query reported about 5.7 seconds for the server's question phase; the longer multi-turn citation regression reported about 9.5 seconds. These are small-sample measurements, not p95 results, end-to-end browser timings, or SLAs. Free Render hosting can introduce cold starts.
-
-Current deployment runs the durable ingestion worker alongside FastAPI using RUN_WORKER=true. A separate paid worker and always-on API remain available as a scaling option. Public-repository Render deployments and Vercel CLI releases are currently deployed manually; installing the hosting GitHub integrations is required for automatic releases.
-
-Supabase RLS and private Storage are enabled. The security advisor's signed-in SECURITY DEFINER warnings cover intentionally exposed RPCs with explicit membership/role checks. The ingestion job table intentionally has no user policies. Anonymous helper access was revoked. Compromised-password checking is not enabled on this project; this is distinct from password hashing, email verification, and workspace authorization.
-
-The application does not guarantee semantic correctness from citation presence alone. Review evidence for important decisions. Exact whole-spreadsheet aggregation, Office embedded-image OCR, legacy Office formats, enterprise SSO, billing, and audio/video ingestion remain outside this release.
+This sample is not a general accuracy benchmark. Important financial or policy decisions require source review. Deterministic arithmetic and stronger claim-to-passage verification remain development priorities.

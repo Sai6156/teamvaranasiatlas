@@ -62,7 +62,7 @@
       "title": "Integrated Annual Report 2024–25",
       "period": "FY 2024–25",
       "collection": "Reports",
-      "path": "demo\\prepared\\reliance\\annual-report.pdf",
+      "path": "demo/prepared/reliance/annual-report.pdf",
       "bytes": 7534577,
       "sha256": "2d241c9d81b487af5a1024f676efdaa97a0d98d046d57fedf20ecf9bb1241021",
       "mime_type": "application/pdf",
@@ -662,8 +662,8 @@
         "demo\\reliance\\RIL-IAR-2025.pdf"
       ],
       "chunks": 290,
-      "chunk_path": "demo\\prepared\\reliance\\annual-report.chunks.json",
-      "coverage_path": "demo\\prepared\\reliance\\annual-report.meta.json",
+      "chunk_path": "demo/prepared/reliance/annual-report.chunks.json",
+      "coverage_path": "demo/prepared/reliance/annual-report.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 147 PDF pages examined. Original page references retained. Public historical document: FY 2024–25."
     },
     {
@@ -674,7 +674,7 @@
       "title": "Q4 and FY2025 Financial Results",
       "period": "FY2025 Q4",
       "collection": "Financials",
-      "path": "demo\\prepared\\reliance\\fy2025-q4-results.pdf",
+      "path": "demo/prepared/reliance/fy2025-q4-results.pdf",
       "bytes": 1003791,
       "sha256": "f5c834f19fbc1a7fdb4ce865dde317c15c962a692dd2590c3fe4cac3e8fb3f2b",
       "mime_type": "application/pdf",
@@ -862,8 +862,8 @@
         "demo-data\\companies\\reliance\\fy2025-q4-results.pdf"
       ],
       "chunks": 44,
-      "chunk_path": "demo\\prepared\\reliance\\fy2025-q4-results.chunks.json",
-      "coverage_path": "demo\\prepared\\reliance\\fy2025-q4-results.meta.json",
+      "chunk_path": "demo/prepared/reliance/fy2025-q4-results.chunks.json",
+      "coverage_path": "demo/prepared/reliance/fy2025-q4-results.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 44 PDF pages examined. Original page references retained. Public historical document: FY2025 Q4."
     },
     {
@@ -874,7 +874,7 @@
       "title": "Code of Conduct",
       "period": "Policy snapshot",
       "collection": "Governance",
-      "path": "demo\\prepared\\reliance\\code-of-conduct.pdf",
+      "path": "demo/prepared/reliance/code-of-conduct.pdf",
       "bytes": 1806307,
       "sha256": "193842f0cee84dd9b31ae19837f87da5be1b3782fb74d589ff884c6ebd05f87a",
       "mime_type": "application/pdf",
@@ -962,8 +962,8 @@
         "demo-data\\companies\\reliance\\code-of-conduct.pdf"
       ],
       "chunks": 19,
-      "chunk_path": "demo\\prepared\\reliance\\code-of-conduct.chunks.json",
-      "coverage_path": "demo\\prepared\\reliance\\code-of-conduct.meta.json",
+      "chunk_path": "demo/prepared/reliance/code-of-conduct.chunks.json",
+      "coverage_path": "demo/prepared/reliance/code-of-conduct.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 19 PDF pages examined. Original page references retained. Public historical document: Policy snapshot."
     },
     {
@@ -974,7 +974,7 @@
       "title": "Integrated Annual Report 2025–26",
       "period": "FY 2025–26",
       "collection": "Reports",
-      "path": "demo\\prepared\\wipro\\annual-report.pdf",
+      "path": "demo/prepared/wipro/annual-report.pdf",
       "bytes": 15339469,
       "sha256": "c4213cfb12a9d5476357f8b499f4d221def16eaadf36358168629042a4817af8",
       "mime_type": "application/pdf",
@@ -3178,8 +3178,8 @@
         "demo\\wipro\\Integrated-annual-report-2025-26.pdf"
       ],
       "chunks": 549,
-      "chunk_path": "demo\\prepared\\wipro\\annual-report.chunks.json",
-      "coverage_path": "demo\\prepared\\wipro\\annual-report.meta.json",
+      "chunk_path": "demo/prepared/wipro/annual-report.chunks.json",
+      "coverage_path": "demo/prepared/wipro/annual-report.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 548 PDF pages examined. Original page references retained. Public historical document: FY 2025–26."
     },
     {
@@ -3190,7 +3190,7 @@
       "title": "Q4 and FY2025 Financial Results",
       "period": "FY2025 Q4",
       "collection": "Financials",
-      "path": "demo\\prepared\\wipro\\fy2025-q4-results.pdf",
+      "path": "demo/prepared/wipro/fy2025-q4-results.pdf",
       "bytes": 369880,
       "sha256": "5efd1d46e29eef1096ad9451c282b338d53b25ef3caec8133c7bb54a5bf2d932",
       "mime_type": "application/pdf",
@@ -3254,8 +3254,8 @@
         "demo-data\\companies\\wipro\\fy2025-q4-results.pdf"
       ],
       "chunks": 13,
-      "chunk_path": "demo\\prepared\\wipro\\fy2025-q4-results.chunks.json",
-      "coverage_path": "demo\\prepared\\wipro\\fy2025-q4-results.meta.json",
+      "chunk_path": "demo/prepared/wipro/fy2025-q4-results.chunks.json",
+      "coverage_path": "demo/prepared/wipro/fy2025-q4-results.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 13 PDF pages examined. Original page references retained. Public historical document: FY2025 Q4."
     },
     {
@@ -3266,7 +3266,7 @@
       "title": "Code of Business Conduct and Ethics",
       "period": "Policy snapshot",
       "collection": "Governance",
-      "path": "demo\\prepared\\wipro\\code-of-conduct.pdf",
+      "path": "demo/prepared/wipro/code-of-conduct.pdf",
       "bytes": 1984047,
       "sha256": "5f467ab9959d44e255b960de2bff4a59c3c852be52e23b7598c9014eb8be265e",
       "mime_type": "application/pdf",
@@ -3422,8 +3422,8 @@
         "demo-data\\companies\\wipro\\code-of-conduct.pdf"
       ],
       "chunks": 36,
-      "chunk_path": "demo\\prepared\\wipro\\code-of-conduct.chunks.json",
-      "coverage_path": "demo\\prepared\\wipro\\code-of-conduct.meta.json",
+      "chunk_path": "demo/prepared/wipro/code-of-conduct.chunks.json",
+      "coverage_path": "demo/prepared/wipro/code-of-conduct.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 36 PDF pages examined. Original page references retained. Public historical document: Policy snapshot."
     },
     {
@@ -3434,7 +3434,7 @@
       "title": "Integrated Annual Report 2025–26",
       "period": "FY 2025–26",
       "collection": "Reports",
-      "path": "demo\\prepared\\hcltech\\annual-report.pdf",
+      "path": "demo/prepared/hcltech/annual-report.pdf",
       "bytes": 15644706,
       "sha256": "66ed3b4e98014a412987de73572e99cce3a84d86bc7a2e5ee8008a14f522a971",
       "mime_type": "application/pdf",
@@ -5294,8 +5294,8 @@
         "demo\\hcl tech\\annual-report-2025-26.pdf"
       ],
       "chunks": 462,
-      "chunk_path": "demo\\prepared\\hcltech\\annual-report.chunks.json",
-      "coverage_path": "demo\\prepared\\hcltech\\annual-report.meta.json",
+      "chunk_path": "demo/prepared/hcltech/annual-report.chunks.json",
+      "coverage_path": "demo/prepared/hcltech/annual-report.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 462 PDF pages examined. Original page references retained. Public historical document: FY 2025–26."
     },
     {
@@ -5306,7 +5306,7 @@
       "title": "Q4 and FY2025 Investor Release",
       "period": "FY2025 Q4",
       "collection": "Financials",
-      "path": "demo\\prepared\\hcltech\\fy2025-q4-results.pdf",
+      "path": "demo/prepared/hcltech/fy2025-q4-results.pdf",
       "bytes": 1378558,
       "sha256": "8649fd0fffb1fd4ce3670e31a2a19bc568b69ed0cd994dcc8c9998133010d15f",
       "mime_type": "application/pdf",
@@ -5478,8 +5478,8 @@
         "demo-data\\companies\\hcltech\\fy2025-q4-results.pdf"
       ],
       "chunks": 40,
-      "chunk_path": "demo\\prepared\\hcltech\\fy2025-q4-results.chunks.json",
-      "coverage_path": "demo\\prepared\\hcltech\\fy2025-q4-results.meta.json",
+      "chunk_path": "demo/prepared/hcltech/fy2025-q4-results.chunks.json",
+      "coverage_path": "demo/prepared/hcltech/fy2025-q4-results.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 40 PDF pages examined. Original page references retained. Public historical document: FY2025 Q4."
     },
     {
@@ -5490,7 +5490,7 @@
       "title": "Global Code of Business Ethics and Conduct",
       "period": "May 2025 edition",
       "collection": "Governance",
-      "path": "demo\\prepared\\hcltech\\code-of-conduct.pdf",
+      "path": "demo/prepared/hcltech/code-of-conduct.pdf",
       "bytes": 417695,
       "sha256": "4b7aaef79fefd3b58ff734ffbf6d30fb266e6f6620cc244b2d7da289e14bf1e5",
       "mime_type": "application/pdf",
@@ -5634,8 +5634,8 @@
         "demo-data\\companies\\hcltech\\code-of-conduct.pdf"
       ],
       "chunks": 33,
-      "chunk_path": "demo\\prepared\\hcltech\\code-of-conduct.chunks.json",
-      "coverage_path": "demo\\prepared\\hcltech\\code-of-conduct.meta.json",
+      "chunk_path": "demo/prepared/hcltech/code-of-conduct.chunks.json",
+      "coverage_path": "demo/prepared/hcltech/code-of-conduct.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 33 PDF pages examined. Original page references retained. Public historical document: May 2025 edition."
     },
     {
@@ -5646,7 +5646,7 @@
       "title": "Annual Report 2025",
       "period": "FY 2025",
       "collection": "Reports",
-      "path": "demo\\prepared\\microsoft\\annual-report.pdf",
+      "path": "demo/prepared/microsoft/annual-report.pdf",
       "bytes": 510875,
       "sha256": "f740b97158a90421aa4556be6395134a16e82b34bcf16c6057c7dcf0caf787fa",
       "mime_type": "application/pdf",
@@ -5910,8 +5910,8 @@
         "demo\\microsoft\\Microsoft 2025 Annual Report.pdf"
       ],
       "chunks": 63,
-      "chunk_path": "demo\\prepared\\microsoft\\annual-report.chunks.json",
-      "coverage_path": "demo\\prepared\\microsoft\\annual-report.meta.json",
+      "chunk_path": "demo/prepared/microsoft/annual-report.chunks.json",
+      "coverage_path": "demo/prepared/microsoft/annual-report.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 63 PDF pages examined. Original page references retained. Public historical document: FY 2025."
     },
     {
@@ -5922,7 +5922,7 @@
       "title": "Q4 and FY2025 Earnings Release",
       "period": "FY2025 Q4",
       "collection": "Financials",
-      "path": "demo\\prepared\\microsoft\\fy2025-q4-results.html",
+      "path": "demo/prepared/microsoft/fy2025-q4-results.html",
       "bytes": 533465,
       "sha256": "3cdaf6a38931f2b1626f36b3080c50cc3fcf318cf13b259313871e4bda0f135f",
       "mime_type": "text/html",
@@ -5933,8 +5933,8 @@
         "demo-data\\companies\\microsoft\\fy2025-q4-results.html"
       ],
       "chunks": 4,
-      "chunk_path": "demo\\prepared\\microsoft\\fy2025-q4-results.chunks.json",
-      "coverage_path": "demo\\prepared\\microsoft\\fy2025-q4-results.meta.json",
+      "chunk_path": "demo/prepared/microsoft/fy2025-q4-results.chunks.json",
+      "coverage_path": "demo/prepared/microsoft/fy2025-q4-results.meta.json",
       "extraction_note": "Complete public HTML source normalized locally, tables retain row order. FY2025 Q4."
     },
     {
@@ -5945,7 +5945,7 @@
       "title": "Standards of Business Conduct â€” Trust Code",
       "period": "Policy snapshot",
       "collection": "Governance",
-      "path": "demo\\prepared\\microsoft\\trust-code.pdf",
+      "path": "demo/prepared/microsoft/trust-code.pdf",
       "bytes": 17209920,
       "sha256": "488493a528c75f7b4d104c56abb6e520f99b02078bb16cc0a99b9cd248852a2d",
       "mime_type": "application/pdf",
@@ -6169,8 +6169,8 @@
         "demo-data\\companies\\microsoft\\trust-code.pdf"
       ],
       "chunks": 53,
-      "chunk_path": "demo\\prepared\\microsoft\\trust-code.chunks.json",
-      "coverage_path": "demo\\prepared\\microsoft\\trust-code.meta.json",
+      "chunk_path": "demo/prepared/microsoft/trust-code.chunks.json",
+      "coverage_path": "demo/prepared/microsoft/trust-code.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 53 PDF pages examined. Original page references retained. Public historical document: Policy snapshot."
     },
     {
@@ -6181,7 +6181,7 @@
       "title": "Annual Report and Proxy 2026",
       "period": "FY 2026",
       "collection": "Reports",
-      "path": "demo\\prepared\\nvidia\\annual-report.pdf",
+      "path": "demo/prepared/nvidia/annual-report.pdf",
       "bytes": 15881397,
       "sha256": "f1f06c914bff7427af9fd158836cf77631c9a7d2a89da89a807dda80f8f1a69f",
       "mime_type": "application/pdf",
@@ -6893,8 +6893,8 @@
         "demo\\nvidia\\2026-Annual-Report-Web.pdf"
       ],
       "chunks": 175,
-      "chunk_path": "demo\\prepared\\nvidia\\annual-report.chunks.json",
-      "coverage_path": "demo\\prepared\\nvidia\\annual-report.meta.json",
+      "chunk_path": "demo/prepared/nvidia/annual-report.chunks.json",
+      "coverage_path": "demo/prepared/nvidia/annual-report.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 175 PDF pages examined. Original page references retained. Public historical document: FY 2026."
     },
     {
@@ -6905,7 +6905,7 @@
       "title": "Q4 and FY2025 Financial Results",
       "period": "FY2025 Q4",
       "collection": "Financials",
-      "path": "demo\\prepared\\nvidia\\fy2025-q4-results.html",
+      "path": "demo/prepared/nvidia/fy2025-q4-results.html",
       "bytes": 400207,
       "sha256": "7e80228d2e31817b9cd86de3faa21c95dff2e61c4c4520c63e06e8b3b72218c5",
       "mime_type": "text/html",
@@ -6916,8 +6916,8 @@
         "demo-data\\companies\\nvidia\\fy2025-q4-results.html"
       ],
       "chunks": 6,
-      "chunk_path": "demo\\prepared\\nvidia\\fy2025-q4-results.chunks.json",
-      "coverage_path": "demo\\prepared\\nvidia\\fy2025-q4-results.meta.json",
+      "chunk_path": "demo/prepared/nvidia/fy2025-q4-results.chunks.json",
+      "coverage_path": "demo/prepared/nvidia/fy2025-q4-results.meta.json",
       "extraction_note": "Complete public HTML source normalized locally, tables retain row order. FY2025 Q4."
     },
     {
@@ -6928,7 +6928,7 @@
       "title": "Finance Team Code of Conduct",
       "period": "June 2023 edition",
       "collection": "Governance",
-      "path": "demo\\prepared\\nvidia\\finance-team-code.pdf",
+      "path": "demo/prepared/nvidia/finance-team-code.pdf",
       "bytes": 186434,
       "sha256": "ecebed066a64782a2716cca1176cca42802e2904f2be065aeb72d7fffa11c965",
       "mime_type": "application/pdf",
@@ -6948,8 +6948,8 @@
         "demo-data\\companies\\nvidia\\finance-team-code.pdf"
       ],
       "chunks": 2,
-      "chunk_path": "demo\\prepared\\nvidia\\finance-team-code.chunks.json",
-      "coverage_path": "demo\\prepared\\nvidia\\finance-team-code.meta.json",
+      "chunk_path": "demo/prepared/nvidia/finance-team-code.chunks.json",
+      "coverage_path": "demo/prepared/nvidia/finance-team-code.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 2 PDF pages examined. Original page references retained. Public historical document: June 2023 edition."
     },
     {
@@ -6960,7 +6960,7 @@
       "title": "Annual Report 2025",
       "period": "Calendar 2025",
       "collection": "Reports",
-      "path": "demo\\prepared\\amazon\\annual-report.pdf",
+      "path": "demo/prepared/amazon/annual-report.pdf",
       "bytes": 1144393,
       "sha256": "669dc526df7f1cae8630d7cd1b16c9ba73434c0e28783cf0077f403d6caffaa7",
       "mime_type": "application/pdf",
@@ -7340,8 +7340,8 @@
         "demo\\amazon\\Amazon-2025-Annual-Report.pdf"
       ],
       "chunks": 91,
-      "chunk_path": "demo\\prepared\\amazon\\annual-report.chunks.json",
-      "coverage_path": "demo\\prepared\\amazon\\annual-report.meta.json",
+      "chunk_path": "demo/prepared/amazon/annual-report.chunks.json",
+      "coverage_path": "demo/prepared/amazon/annual-report.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 92 PDF pages examined. Original page references retained. Public historical document: Calendar 2025."
     },
     {
@@ -7352,7 +7352,7 @@
       "title": "Fourth Quarter and Full Year 2025 Results",
       "period": "Calendar 2025 Q4",
       "collection": "Financials",
-      "path": "demo\\prepared\\amazon\\2025-q4-results.html",
+      "path": "demo/prepared/amazon/2025-q4-results.html",
       "bytes": 583563,
       "sha256": "1a5e319a6c591dd3785135f2144921d943dc138fb71d953eacbeb03676d91fc9",
       "mime_type": "text/html",
@@ -7363,8 +7363,8 @@
         "demo-data\\companies\\amazon\\2025-q4-results.html"
       ],
       "chunks": 9,
-      "chunk_path": "demo\\prepared\\amazon\\2025-q4-results.chunks.json",
-      "coverage_path": "demo\\prepared\\amazon\\2025-q4-results.meta.json",
+      "chunk_path": "demo/prepared/amazon/2025-q4-results.chunks.json",
+      "coverage_path": "demo/prepared/amazon/2025-q4-results.meta.json",
       "extraction_note": "Complete public HTML source normalized locally, tables retain row order. Calendar 2025 Q4."
     },
     {
@@ -7375,7 +7375,7 @@
       "title": "Code of Business Conduct and Ethics",
       "period": "Policy snapshot",
       "collection": "Governance",
-      "path": "demo\\prepared\\amazon\\code-of-conduct.html",
+      "path": "demo/prepared/amazon/code-of-conduct.html",
       "bytes": 52212,
       "sha256": "d0fffdd4e942fbdf6530a1283281889a7894867c8957917788202d49c2941255",
       "mime_type": "text/html",
@@ -7386,8 +7386,8 @@
         "demo-data\\companies\\amazon\\code-of-conduct.html"
       ],
       "chunks": 2,
-      "chunk_path": "demo\\prepared\\amazon\\code-of-conduct.chunks.json",
-      "coverage_path": "demo\\prepared\\amazon\\code-of-conduct.meta.json",
+      "chunk_path": "demo/prepared/amazon/code-of-conduct.chunks.json",
+      "coverage_path": "demo/prepared/amazon/code-of-conduct.meta.json",
       "extraction_note": "Complete public HTML source normalized locally, tables retain row order. Policy snapshot."
     },
     {
@@ -7398,7 +7398,7 @@
       "title": "Annual Report FY 2025–26 — Part 1 of 3 (pages 1–120)",
       "period": "FY 2025–26",
       "collection": "Reports",
-      "path": "demo\\prepared\\tcs\\annual-report-part-1.pdf",
+      "path": "demo/prepared/tcs/annual-report-part-1.pdf",
       "bytes": 9019300,
       "sha256": "c560cebf9062942b8c9c1791149352edec3ff120927e2083d9d6f961a072f003",
       "mime_type": "application/pdf",
@@ -7890,8 +7890,8 @@
         "demo\\tcs\\TCS_Annual_Report_2025-26.pdf"
       ],
       "chunks": 150,
-      "chunk_path": "demo\\prepared\\tcs\\annual-report-part-1.chunks.json",
-      "coverage_path": "demo\\prepared\\tcs\\annual-report-part-1.meta.json",
+      "chunk_path": "demo/prepared/tcs/annual-report-part-1.chunks.json",
+      "coverage_path": "demo/prepared/tcs/annual-report-part-1.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 120 PDF pages examined. Original page references retained. Public historical document: FY 2025–26."
     },
     {
@@ -7902,7 +7902,7 @@
       "title": "Annual Report FY 2025–26 — Part 2 of 3 (pages 121–240)",
       "period": "FY 2025–26",
       "collection": "Reports",
-      "path": "demo\\prepared\\tcs\\annual-report-part-2.pdf",
+      "path": "demo/prepared/tcs/annual-report-part-2.pdf",
       "bytes": 8080696,
       "sha256": "dd7512d52c798a454336c3daca236710f687ef75bd578dd21474b35656073c43",
       "mime_type": "application/pdf",
@@ -8394,8 +8394,8 @@
         "demo\\tcs\\TCS_Annual_Report_2025-26.pdf"
       ],
       "chunks": 120,
-      "chunk_path": "demo\\prepared\\tcs\\annual-report-part-2.chunks.json",
-      "coverage_path": "demo\\prepared\\tcs\\annual-report-part-2.meta.json",
+      "chunk_path": "demo/prepared/tcs/annual-report-part-2.chunks.json",
+      "coverage_path": "demo/prepared/tcs/annual-report-part-2.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 120 PDF pages examined. Original page references retained. Public historical document: FY 2025–26."
     },
     {
@@ -8406,7 +8406,7 @@
       "title": "Annual Report FY 2025–26 — Part 3 of 3 (pages 241–360)",
       "period": "FY 2025–26",
       "collection": "Reports",
-      "path": "demo\\prepared\\tcs\\annual-report-part-3.pdf",
+      "path": "demo/prepared/tcs/annual-report-part-3.pdf",
       "bytes": 9957257,
       "sha256": "c83943054dba9b0e628293b012c5d78f121dfcbe0f18fab13bbc1faad8de4eaa",
       "mime_type": "application/pdf",
@@ -8898,8 +8898,8 @@
         "demo\\tcs\\TCS_Annual_Report_2025-26.pdf"
       ],
       "chunks": 120,
-      "chunk_path": "demo\\prepared\\tcs\\annual-report-part-3.chunks.json",
-      "coverage_path": "demo\\prepared\\tcs\\annual-report-part-3.meta.json",
+      "chunk_path": "demo/prepared/tcs/annual-report-part-3.chunks.json",
+      "coverage_path": "demo/prepared/tcs/annual-report-part-3.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 120 PDF pages examined. Original page references retained. Public historical document: FY 2025–26."
     },
     {
@@ -8910,7 +8910,7 @@
       "title": "Annual Report FY 2024–25 — Part 1 of 3 (pages 1–123)",
       "period": "FY 2024–25",
       "collection": "Reports",
-      "path": "demo\\prepared\\infosys\\annual-report-part-1.pdf",
+      "path": "demo/prepared/infosys/annual-report-part-1.pdf",
       "bytes": 5499706,
       "sha256": "c2188c97746e110c44093ef635a78729320dacbeccaf51c053c3e50ca449b121",
       "mime_type": "application/pdf",
@@ -9414,8 +9414,8 @@
         "demo\\infosys\\infosys-ar-25.pdf"
       ],
       "chunks": 151,
-      "chunk_path": "demo\\prepared\\infosys\\annual-report-part-1.chunks.json",
-      "coverage_path": "demo\\prepared\\infosys\\annual-report-part-1.meta.json",
+      "chunk_path": "demo/prepared/infosys/annual-report-part-1.chunks.json",
+      "coverage_path": "demo/prepared/infosys/annual-report-part-1.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 123 PDF pages examined. Original page references retained. Public historical document: FY 2024–25."
     },
     {
@@ -9426,7 +9426,7 @@
       "title": "Annual Report FY 2024–25 — Part 2 of 3 (pages 124–246)",
       "period": "FY 2024–25",
       "collection": "Reports",
-      "path": "demo\\prepared\\infosys\\annual-report-part-2.pdf",
+      "path": "demo/prepared/infosys/annual-report-part-2.pdf",
       "bytes": 910258,
       "sha256": "1913df18170be2e133ac0eba6a830c054a01fd5bc50886dd8aee77496610d349",
       "mime_type": "application/pdf",
@@ -9930,8 +9930,8 @@
         "demo\\infosys\\infosys-ar-25.pdf"
       ],
       "chunks": 123,
-      "chunk_path": "demo\\prepared\\infosys\\annual-report-part-2.chunks.json",
-      "coverage_path": "demo\\prepared\\infosys\\annual-report-part-2.meta.json",
+      "chunk_path": "demo/prepared/infosys/annual-report-part-2.chunks.json",
+      "coverage_path": "demo/prepared/infosys/annual-report-part-2.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 123 PDF pages examined. Original page references retained. Public historical document: FY 2024–25."
     },
     {
@@ -9942,7 +9942,7 @@
       "title": "Annual Report FY 2024–25 — Part 3 of 3 (pages 247–369)",
       "period": "FY 2024–25",
       "collection": "Reports",
-      "path": "demo\\prepared\\infosys\\annual-report-part-3.pdf",
+      "path": "demo/prepared/infosys/annual-report-part-3.pdf",
       "bytes": 966003,
       "sha256": "701a34eb23294c77142abea1dad032caeda1e5ac6e64ced2c8672df2f502c173",
       "mime_type": "application/pdf",
@@ -10446,8 +10446,8 @@
         "demo\\infosys\\infosys-ar-25.pdf"
       ],
       "chunks": 123,
-      "chunk_path": "demo\\prepared\\infosys\\annual-report-part-3.chunks.json",
-      "coverage_path": "demo\\prepared\\infosys\\annual-report-part-3.meta.json",
+      "chunk_path": "demo/prepared/infosys/annual-report-part-3.chunks.json",
+      "coverage_path": "demo/prepared/infosys/annual-report-part-3.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 123 PDF pages examined. Original page references retained. Public historical document: FY 2024–25."
     },
     {
@@ -10458,7 +10458,7 @@
       "title": "FY 2026 Q1, Q2 and Q3 Financial Statements",
       "period": "FY 2026 Q1–Q3 (separate quarters)",
       "collection": "Financials",
-      "path": "demo\\prepared\\apple\\fy2026-financial-statements.pdf",
+      "path": "demo/prepared/apple/fy2026-financial-statements.pdf",
       "bytes": 6386937,
       "sha256": "e2d4467599f12b70ee27d8a02cbec391e8e65ec2c56aefa0c61058c7f01a70b4",
       "mime_type": "application/pdf",
@@ -10508,8 +10508,8 @@
         "demo\\apple\\FY26_Q3_Consolidated_Financial_Statements.pdf"
       ],
       "chunks": 9,
-      "chunk_path": "demo\\prepared\\apple\\fy2026-financial-statements.chunks.json",
-      "coverage_path": "demo\\prepared\\apple\\fy2026-financial-statements.meta.json",
+      "chunk_path": "demo/prepared/apple/fy2026-financial-statements.chunks.json",
+      "coverage_path": "demo/prepared/apple/fy2026-financial-statements.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 9 PDF pages examined. Original page references retained. Public historical document: FY 2026 Q1–Q3 (separate quarters)."
     },
     {
@@ -10520,7 +10520,7 @@
       "title": "Environmental Progress Report 2025 — Part 1 of 2 (pages 1–63)",
       "period": "Published 2025, reporting FY 2024",
       "collection": "Sustainability",
-      "path": "demo\\prepared\\apple\\environmental-report-part-1.pdf",
+      "path": "demo/prepared/apple/environmental-report-part-1.pdf",
       "bytes": 8559625,
       "sha256": "3dafe9fd28bd8741f0585b8856840d13c88030286d37c2f421f083dc0b2f3d5b",
       "mime_type": "application/pdf",
@@ -10784,8 +10784,8 @@
         "demo\\apple\\Apple_Environmental_Progress_Report_2025.pdf"
       ],
       "chunks": 63,
-      "chunk_path": "demo\\prepared\\apple\\environmental-report-part-1.chunks.json",
-      "coverage_path": "demo\\prepared\\apple\\environmental-report-part-1.meta.json",
+      "chunk_path": "demo/prepared/apple/environmental-report-part-1.chunks.json",
+      "coverage_path": "demo/prepared/apple/environmental-report-part-1.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 63 PDF pages examined. Original page references retained. Public historical document: Published 2025, reporting FY 2024."
     },
     {
@@ -10796,7 +10796,7 @@
       "title": "Environmental Progress Report 2025 — Part 2 of 2 (pages 64–126)",
       "period": "Published 2025, reporting FY 2024",
       "collection": "Sustainability",
-      "path": "demo\\prepared\\apple\\environmental-report-part-2.pdf",
+      "path": "demo/prepared/apple/environmental-report-part-2.pdf",
       "bytes": 13035940,
       "sha256": "a9236981022077482d7a443290c8bad2e329655c93cf77836f7e7aff4caf8d09",
       "mime_type": "application/pdf",
@@ -11060,8 +11060,8 @@
         "demo\\apple\\Apple_Environmental_Progress_Report_2025.pdf"
       ],
       "chunks": 72,
-      "chunk_path": "demo\\prepared\\apple\\environmental-report-part-2.chunks.json",
-      "coverage_path": "demo\\prepared\\apple\\environmental-report-part-2.meta.json",
+      "chunk_path": "demo/prepared/apple/environmental-report-part-2.chunks.json",
+      "coverage_path": "demo/prepared/apple/environmental-report-part-2.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 63 PDF pages examined. Original page references retained. Public historical document: Published 2025, reporting FY 2024."
     },
     {
@@ -11072,7 +11072,7 @@
       "title": "Google Environmental Report 2026 — Part 1 of 2 (pages 1–58)",
       "period": "Published 2026",
       "collection": "Sustainability",
-      "path": "demo\\prepared\\alphabet\\environmental-report-part-1.pdf",
+      "path": "demo/prepared/alphabet/environmental-report-part-1.pdf",
       "bytes": 10831469,
       "sha256": "360ce057a30481162c82cc3428b9b699dd20815abb6bb1b135b09907e2b960ad",
       "mime_type": "application/pdf",
@@ -11316,8 +11316,8 @@
         "demo\\alphabet\\download-1699a2e1.pdf"
       ],
       "chunks": 58,
-      "chunk_path": "demo\\prepared\\alphabet\\environmental-report-part-1.chunks.json",
-      "coverage_path": "demo\\prepared\\alphabet\\environmental-report-part-1.meta.json",
+      "chunk_path": "demo/prepared/alphabet/environmental-report-part-1.chunks.json",
+      "coverage_path": "demo/prepared/alphabet/environmental-report-part-1.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 58 PDF pages examined. Original page references retained. Public historical document: Published 2026."
     },
     {
@@ -11328,7 +11328,7 @@
       "title": "Google Environmental Report 2026 — Part 2 of 2 (pages 59–117)",
       "period": "Published 2026",
       "collection": "Sustainability",
-      "path": "demo\\prepared\\alphabet\\environmental-report-part-2.pdf",
+      "path": "demo/prepared/alphabet/environmental-report-part-2.pdf",
       "bytes": 4548187,
       "sha256": "6cc8bafbc6a1c2be8723bb661a42947e287e97092cb5091afc1ad6e8c25bbfca",
       "mime_type": "application/pdf",
@@ -11576,8 +11576,8 @@
         "demo\\alphabet\\download-1699a2e1.pdf"
       ],
       "chunks": 64,
-      "chunk_path": "demo\\prepared\\alphabet\\environmental-report-part-2.chunks.json",
-      "coverage_path": "demo\\prepared\\alphabet\\environmental-report-part-2.meta.json",
+      "chunk_path": "demo/prepared/alphabet/environmental-report-part-2.chunks.json",
+      "coverage_path": "demo/prepared/alphabet/environmental-report-part-2.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 59 PDF pages examined. Original page references retained. Public historical document: Published 2026."
     },
     {
@@ -11588,7 +11588,7 @@
       "title": "Alphabet First Quarter 2026 Results",
       "period": "Calendar 2026 Q1",
       "collection": "Financials",
-      "path": "demo\\prepared\\alphabet\\2026-q1-results.pdf",
+      "path": "demo/prepared/alphabet/2026-q1-results.pdf",
       "bytes": 69644,
       "sha256": "f12f589f22a395a23b141f08ac1fbb4a99b10ec358adeb50bcf68b0dabf725bf",
       "mime_type": "application/pdf",
@@ -11636,8 +11636,8 @@
         "demo\\alphabet\\2026q1-alphabet-earnings-release.pdf"
       ],
       "chunks": 9,
-      "chunk_path": "demo\\prepared\\alphabet\\2026-q1-results.chunks.json",
-      "coverage_path": "demo\\prepared\\alphabet\\2026-q1-results.meta.json",
+      "chunk_path": "demo/prepared/alphabet/2026-q1-results.chunks.json",
+      "coverage_path": "demo/prepared/alphabet/2026-q1-results.meta.json",
       "extraction_note": "Prepared and indexed on the local PC; all 9 PDF pages examined. Original page references retained. Public historical document: Calendar 2026 Q1."
     }
   ]

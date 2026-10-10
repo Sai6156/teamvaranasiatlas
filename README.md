@@ -1,84 +1,96 @@
-# Atlas — company knowledge, connected
+# Atlas
 
-Built by Team Varanasi for the TriCity AI Hackathon. Atlas is a secure company knowledge application: create an account, open a private workspace, invite employees, upload company documents, and ask questions with source evidence.
+Company knowledge with source evidence. Built by Team Varanasi for the TriCity AI Hackathon.
 
-Live application: [atlas-varanasi.vercel.app](https://atlas-varanasi.vercel.app). API readiness: [atlas-varanasi-api.onrender.com/health/ready](https://atlas-varanasi-api.onrender.com/health/ready). See [release verification](docs/VERIFICATION.md) for measured checks and limits.
+[Live application](https://atlas-varanasi.vercel.app) · [Local setup](docs/SETUP.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md)
 
-## Stack
+## The problem
 
-Next.js App Router / React / TypeScript; Python FastAPI; Supabase Auth, PostgreSQL/pgvector, and private Storage; OpenRouter; Vercel frontend and Render API/worker.
+Employees repeatedly ask managers and subject experts questions whose answers already exist in company files. Atlas lets an employer maintain a shared knowledge base and gives employees a conversational way to find the relevant policy, process, or report.
 
-## Local setup
+## Workflow
 
-Requirements: Node.js 22 or 24, Python 3.12+, a Supabase project, and an OpenRouter account with credit.
+1. An employer verifies their account and creates a private company workspace.
+2. An administrator uploads approved files, organizes collections, and invites employees.
+3. Employees ask questions within the workspace.
+4. Atlas retrieves relevant passages and generates answers with source references.
+5. Employees open the cited text or original document and escalate unresolved questions.
 
-1. `npm ci`
-2. `python -m venv .venv`
-3. Activate the environment and `pip install -r services/api/requirements.txt`.
-4. Copy `apps/web/.env.example` to `apps/web/.env.local`; set your Supabase URL/publishable key and API URL.
-5. Copy `services/api/.env.example` to `services/api/.env`; supply your Supabase and OpenRouter server keys. Alternatively put private keys in a root `secrets.env`.
-6. Apply SQL migrations in `supabase/migrations` in numerical order using the Supabase SQL editor or CLI.
-7. Configure Supabase Auth site/redirect URLs and SMTP, as described below.
-8. From `services/api`, run `python -m uvicorn atlas.main:app --host 127.0.0.1 --port 8000`.
-9. In another terminal from `services/api`, run `python -m atlas.worker`.
-10. From the root, run `npm run dev`; open `http://127.0.0.1:3000`.
-
-Signup passwords pass through the server to Supabase Auth; login and password updates use Supabase directly. Passwords are never stored in application tables or logged. Never commit `secrets.env`, `.env`, service/secret keys, or generated test credentials. The browser receives only the public Supabase key and its own session token.
-
-## Required authentication setup
-
-Keep email confirmation enabled. Configure server-only `BREVO_API_KEY`, `BREVO_SENDER_EMAIL` (a verified sender), and `BREVO_SENDER_NAME`. Signup and password recovery deliver Supabase-generated one-time codes through the Brevo transactional API. Enter the code in Atlas to verify the email or reset the password. Supabase remains responsible for code verification and password storage. Custom Supabase SMTP can remain configured for legacy links and other native Auth emails. Set the site URL to the deployed Vercel origin. Allow these redirects on the production origin and localhost for development:
-
-- `/auth/callback` — signup verification
-- `/reset-password` — password recovery
-
-Use at least a 12-character password policy in Supabase Auth; enable compromised-password checks if the project's plan supports them. Frontend forms enforce the 12-character minimum for signup and reset, but the Supabase server policy is authoritative. Invitations are email-bound, single-use, and expire after seven days. Atlas emails invitation links directly through Brevo. New teammates verify their invited email with a signup code before accepting; existing verified users sign in and accept. No separate invitation code is needed.
+![Atlas public company library](docs/assets/demo-library.png)
 
 ## Features
 
-- Email-code signup verification and password recovery through Brevo, password login, signout, and workspace onboarding.
-- Multiple organization workspaces with administrator/employee roles.
-- Private library, named collections, file upload, indexing status, failure retry, source download, and deletion.
-- Hybrid PostgreSQL full-text/pgvector retrieval and streamed grounded answers.
-- Citation cards with exact passages and source locations; private per-user conversations.
-- Searchable, scrollable conversation history and an expandable long-prompt editor with full-draft copying.
-- Complete PDF page indexing, structured table evidence, per-file indexing progress, and focused answers for multi-question prompts.
-- Direct email workspace invitations, role management, and audit activity.
-- Durable PostgreSQL jobs with leases, bounded retries, idempotent chunk indexing, and immediate removal from search on deletion.
-- Native extraction runs in a disposable process with a memory guard; complex PDFs can fall back to aligned text. Workspace loading has a timeout and retry screen.
-- Per-workspace document/storage/question limits; authenticated API, RLS, and private Storage policies.
+- Email-code signup and recovery, password login, and email-bound invitations.
+- Administrator/employee roles, organization-scoped data access, and private file storage.
+- Document upload, collections, asynchronous indexing, progress, retry, and deletion.
+- Hybrid vector/full-text retrieval, passage ranking, streamed answers, and source cards.
+- Private conversation history, company switching, and an expandable prompt editor.
+- Ten public demo companies with three prepared files each. Suggested questions run locally without model requests.
 
-## Supported formats and limits
+## Technology
 
-TXT, Markdown, logs, common programming/config files, JSON/YAML/TOML, SQL, HTML/XML, notebook source, PDF, DOCX, CSV/TSV, XLSX, PPTX, common images, and bounded ZIP archives. Linux deployment includes Tesseract and Poppler for OCR. PDF, paragraph, slide, row/sheet, and line references are preserved. ZIP members retain their paths and source locations; unsupported members are explicitly skipped. Nested/encrypted archives, unsafe paths, symbolic links, and excessive expansion are rejected.
+| Layer | Implementation |
+| --- | --- |
+| Frontend | Next.js, React, TypeScript, CSS |
+| API and ingestion | Python, FastAPI, Uvicorn, isolated parsing processes |
+| Identity and data | Supabase Auth, PostgreSQL, pgvector, RLS, private Storage |
+| Language and embeddings | OpenRouter with ordered routes and a dedicated free-model key |
+| Email | Brevo |
+| Hosting | Vercel frontend, Render API and worker |
 
-Limits: 25 MB/file, 1,500 physical PDF pages, 200 scanned OCR pages, 100,000 spreadsheet/table rows, 8,000 chunks/file, 200 documents and 500 MB per workspace, and 200 questions/workspace/day. ZIP archives are limited to 100 files and 75 MB expanded content. Legacy Office formats, encrypted files, audio/video, executables, and arbitrary binary formats are not currently supported. Image-only content in Office documents is not OCR'd. XLSX uses saved values and does not recalculate formulas. RAG cannot provide exact totals over an entire spreadsheet from only retrieved row subsets; Atlas explicitly asks the model to disclose this limitation.
+## Local development
 
-## AI routing
+Use Node.js 24 and Python 3.12. A configured Supabase project and API credentials are required.
 
-1. `z-ai/glm-5.3-flash`: open-inference → deepinfra → relace → streamlake → novita.
-2. `deepseek/deepseek-v4.1-flash`: decart → morph → inference-net → sail-research → relace.
-3. `openai/gpt-6-luna`: openai → azure.
-4. `qwen/qwen3.8-flash`: automatic OpenRouter routing.
+```bash
+npm ci
+python -m venv .venv
+# Activate .venv, then:
+pip install -r services/api/requirements.txt
+```
 
-Each model gets its own ordered provider allowlist. Transient failures advance routes; invalid credentials/balance/configuration do not retry across all models. Interrupted partial output is marked incomplete rather than joined to another answer. Privacy policy defaults to disallow provider data collection. Optional strict ZDR may reduce route availability.
+Copy `secrets.env.example` to `secrets.env` and `apps/web/.env.example` to `apps/web/.env.local`. Fill the values and configure Supabase using [the setup guide](docs/SETUP.md).
 
-Embeddings: `openai/text-embedding-3-small`, fixed 1536 dimensions. The index and query use the same embedding space. Temporary embedding failure enables explicitly labeled keyword-only search; indexing retries without switching vector spaces.
+```bash
+# Terminal 1, from services/api
+python -m uvicorn atlas.main:app --host 127.0.0.1 --port 8000
+# Terminal 2, from services/api
+python -m atlas.worker
+# Terminal 3, from the repository root
+npm run dev
+```
 
-## Deployment
+Open http://localhost:3000. The package contains source and public demo documents, not an offline database export.
 
-Vercel project root: `apps/web`. Public environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_API_URL`. Set production branch to `main` and disable Vercel deployment protection for the public judging URL if it is enabled.
+## Repository layout
 
-Render Docker context: `services/api`; Dockerfile: `services/api/Dockerfile`. API uses the image default command. Worker command: `python -m atlas.worker`. Set server secrets and `FRONTEND_URL`/`ALLOWED_ORIGINS` to the exact production origin. API liveness: `/health/live`; readiness: `/health/ready`. A `render.yaml` blueprint is provided when available; service plans must be selected with the account owner's budget approval. Free API instances have cold starts. Worker-only services require paid hosting.
+```text
+apps/web/             Web application
+services/api/atlas/    API, authentication, retrieval, and ingestion
+services/api/tests/    Backend regression tests
+supabase/migrations/  Database schema, policies, retrieval, and job queue
+scripts/              Demo preparation, live verification, and packaging
+demo-data/            Public source catalog and preparation manifests
+docs/                 Setup, architecture, security, and verification
+render.yaml           Render deployment configuration
+```
 
-Migrations must be deployed before the API/worker. Back up data before schema changes; deploy compatible changes first. Logs use job/request IDs, not keys, passwords, verification codes, or full uploaded documents. Auth email requests have durable limits: one request per recipient per minute, five per hour, and thirty per requesting actor per hour. Sender IPs must be authorized in Brevo when IP restrictions are enabled. Supabase security-definer RPCs deliberately expose only validated membership/role operations; ingestion jobs have no user-access policies because they are server-only.
+The downloadable archive also includes `demo/` and supplemental public documents. Git and frontend deployments exclude large demo binaries, local diagnostics, and credentials.
 
-## Verification
+## Checks
 
-`npm run typecheck` and `npm run build` check the frontend. From `services/api`, `python -m pytest tests -q` exercises parsers and authentication guards. `python scripts/live_verify.py [API_URL]` runs a live synthetic end-to-end test against the configured project, creates QA users/workspaces, and checks invitations, role restrictions, cross-tenant denial, four formats, duplicate uploads, signed sources, private conversations, and a multi-document answer. It uses API credit. Generated QA credentials stay in ignored `.runtime/`; remove synthetic QA accounts/workspaces after verification.
+```bash
+python -m pytest
+npm run build
+npm run typecheck
+```
 
-## Current scope and submission
+CI repeats backend tests and the frontend build without production credentials. Live integration tests require a dedicated configured project and may send emails or consume API credit.
 
-This is a hackathon application, not a claim of enterprise security certification or guaranteed hallucination elimination. Review source evidence for important decisions. Billing, enterprise SSO, external knowledge connectors, table-wide deterministic analytics, and version comparison remain future scope.
+## Current scope
 
-Use a public repository and add every team member as a collaborator/contributor. Keep the submission ZIP at or below 10 MB, excluding dependencies/build output/secrets. Presentation and product links must be accessible to judges. Video recording is deferred, but its accessible link is still a required hackathon deliverable.
+Atlas handles PDF, DOCX, CSV/TSV, XLSX, PPTX, plain text, Markdown, common code/configuration files, images, and bounded ZIP archives. Default limits include 25 MB per upload, 1,500 PDF pages, and 8,000 chunks per file.
+
+Citations help users inspect evidence. They do not guarantee correct interpretation, arithmetic, or citation alignment. Review original sources for important decisions. [Verification](docs/VERIFICATION.md) records the known answer-quality limitations. Free hosting can have cold starts; free inference endpoints have provider quotas and privacy restrictions.
+
+Enterprise SSO, external connectors, version comparison, and general deterministic financial analytics are outside this release. Public demo publishers retain ownership of their documents. See [NOTICE](NOTICE.md).

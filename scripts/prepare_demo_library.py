@@ -14,7 +14,9 @@ from atlas.extraction import Block, chunk_blocks
 from atlas.pdf_extract import clean, layout, panels, printed_pages
 from download_demo_documents import html_blocks
 
-os.environ["TESSDATA_PREFIX"] = str(ROOT / ".runtime/tessdata")
+tessdata = ROOT / ".runtime/tessdata"
+if tessdata.is_dir() and "TESSDATA_PREFIX" not in os.environ:
+    os.environ["TESSDATA_PREFIX"] = str(tessdata)
 MANIFEST = ROOT / "demo-data/prepared-manifest.json"
 DOWNLOADS = json.loads((ROOT / "demo-data/download-manifest.json").read_text())
 COMPANIES = [("reliance", "Reliance Industries", "India"), ("tcs", "TCS", "India"), ("infosys", "Infosys", "India"), ("wipro", "Wipro", "India"), ("hcltech", "HCLTech", "India"), ("microsoft", "Microsoft", "Global"), ("apple", "Apple", "Global"), ("nvidia", "NVIDIA", "Global"), ("amazon", "Amazon", "Global"), ("alphabet", "Alphabet", "Global")]

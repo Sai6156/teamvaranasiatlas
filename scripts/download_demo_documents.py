@@ -15,7 +15,9 @@ sys.path.insert(0, str(ROOT / "services/api"))
 from atlas.extraction import Block, chunk_blocks
 from atlas.pdf_extract import extract_pdf
 
-os.environ["TESSDATA_PREFIX"] = str(ROOT / ".runtime/tessdata")
+tessdata = ROOT / ".runtime/tessdata"
+if tessdata.is_dir() and "TESSDATA_PREFIX" not in os.environ:
+    os.environ["TESSDATA_PREFIX"] = str(tessdata)
 
 CATALOG = ROOT / "demo-data/source-catalog.json"
 MANIFEST = ROOT / "demo-data/download-manifest.json"
