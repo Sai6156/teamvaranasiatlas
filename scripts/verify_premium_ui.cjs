@@ -17,7 +17,7 @@ async function main() {
     executablePath:
       "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
     headless: true,
-    args: ["--host-resolver-rules=MAP atlas-varanasi.vercel.app 216.198.79.67"],
+    args: ["--host-resolver-rules=MAP atlas-varanasi.vercel.app 64.29.17.67"],
   });
   const errors = [];
   let modelRequests = 0;
@@ -251,4 +251,5 @@ main().catch((e) => {
   console.error(e.message);
   process.exit(1);
 });
+
 
