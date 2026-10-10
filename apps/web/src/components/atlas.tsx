@@ -456,36 +456,11 @@ function AuthView({
     }
   }
   return (
-    <div className="auth-layout">
-      <aside className="auth-story">
-        <Link href="/">
-          <Logo />
-        </Link>
-        <div className="auth-story-copy">
-          <span className="eyebrow">A LITTLE CLARITY GOES A LONG WAY</span>
-          <h1>
-            Your next answer
-            <br />
-            is already here.
-          </h1>
-          <p>
-            Turn your company’s scattered knowledge into a place where everyone
-            can find their way.
-          </p>
-          <div className="auth-testimonial">
-            <BookOpen size={24} />
-            <p>
-              From “where’s that document?”
-              <br />
-              to “here’s what you need.”
-            </p>
-            <span>One workspace. Your whole company.</span>
-          </div>
-        </div>
-        <span className="auth-story-footer">
-          <ShieldCheck size={16} />
-          Private by design. Grounded in your sources.
-        </span>
+    <div className="auth-layout auth-reference-layout">
+      <aside className="auth-reference-visual" aria-label="Company documents connected to a conversation">
+        <svg className="auth-reference-image" viewBox="0 0 1048 941" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <image href="/images/company-knowledge.png" width="1672" height="941" />
+        </svg>
       </aside>
       <main className="auth-main">
         <Link className="back-home" href="/">
@@ -493,23 +468,19 @@ function AuthView({
           Back to home
         </Link>
         <div className="auth-form-wrap">
-          <span className="auth-icon">
-            {forgot ? <Mail /> : join ? <Users /> : <LockKeyhole />}
-          </span>
-          <span className="eyebrow">
-            {codeSent && (signup || forgot)
-              ? "Check your inbox"
-              : signup
-                ? "MAKE ROOM FOR BETTER ANSWERS"
-                : "YOUR KNOWLEDGE, WITHIN REACH"}
-          </span>
+          <Link href="/" className="auth-form-brand" aria-label="Atlas home"><Logo /></Link>
+          {(codeSent || forgot || reset || join || callback) && (
+            <span className="auth-state-label">
+              {codeSent ? "Check your inbox" : forgot ? "Account recovery" : join ? "Your company invitation" : "Secure account access"}
+            </span>
+          )}
           <h2>
             {codeSent && (signup || forgot)
               ? signup
                 ? "Verify your email"
                 : "Verify reset code"
               : signup
-                ? "Create your account"
+                ? <>Your company knowledge,<br /><em>ready for your team.</em></>
                 : forgot
                   ? "Forgot your password?"
                   : reset
@@ -518,7 +489,7 @@ function AuthView({
                       ? "Join your team"
                       : callback
                         ? "Confirming your account…"
-                        : "Welcome back."}
+                        : <>Your company knowledge,<br /><em>now conversational.</em></>}
           </h2>
           <p>
             {codeSent && (signup || forgot)
@@ -533,7 +504,7 @@ function AuthView({
                       ? "Accept your workspace invitation using the email it was sent to."
                       : callback
                         ? "We’re checking your email verification."
-                        : "Sign in to pick up where you left off."}
+                        : "Securely access company policies, reports and information, all in one place."}
           </p>
           {!configured && (
             <div className="notice warning">
@@ -635,6 +606,8 @@ function AuthView({
               {!reset && !join && !codeSent && (
                 <label>
                   Work email
+                  <span className="auth-input-shell">
+                    <Mail size={18} aria-hidden="true" />
                   <input
                     type="email"
                     autoComplete="email"
@@ -644,18 +617,19 @@ function AuthView({
                     required
                     maxLength={254}
                   />
+                  </span>
                 </label>
               )}
               {!forgot && !join && !codeSent && (
                 <label>
                   <span className="label-row">
                     Password
-                    {!signup && !reset && (
-                      <Link href="/forgot-password">Forgot password?</Link>
-                    )}
+
                   </span>
                   <span className="password-field">
+                    <LockKeyhole className="auth-password-icon" size={18} aria-hidden="true" />
                     <input
+                      aria-label="Password"
                       type={show ? "text" : "password"}
                       autoComplete={
                         signup || reset ? "new-password" : "current-password"
@@ -679,6 +653,7 @@ function AuthView({
                       {show ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </span>
+                  {!signup && !reset && <span className="auth-recovery-link"><Link href="/forgot-password">Forgot password?</Link></span>}
                   {(signup || reset) && (
                     <small className="field-help">
                       Use a unique password with at least 12 characters.
@@ -752,7 +727,7 @@ function AuthView({
           )}
           <div className="auth-privacy">
             <ShieldCheck size={14} />
-            Your password is handled securely by Supabase Auth.
+            Verified accounts. Private company workspaces.
           </div>
         </div>
         <div className="auth-bottom">ATLAS · COMPANY KNOWLEDGE, CONNECTED</div>
