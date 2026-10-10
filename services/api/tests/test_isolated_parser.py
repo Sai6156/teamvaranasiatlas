@@ -67,3 +67,22 @@ def test_low_memory_pdf_preserves_every_page_and_aligned_values(monkeypatch):
         for block in blocks
     )
     assert "native text and aligned columns" in note
+
+
+@pytest.mark.asyncio
+async def test_low_memory_child_reports_complete_page_progress():
+    import pymupdf
+
+    document = pymupdf.open()
+    for _ in range(3):
+        document.new_page().insert_text(
+            (40, 40), "Team policy\nAnnual leave is 18 days."
+        )
+    data = document.tobytes()
+    document.close()
+    progress = [0, 0]
+    chunks, note = await isolated_parser.prepare(
+        data, "policy.pdf", progress, lightweight_pdf=True
+    )
+    assert progress == [3, 3]
+    assert {chunk.location["page"] for chunk in chunks} == {1, 2, 3}

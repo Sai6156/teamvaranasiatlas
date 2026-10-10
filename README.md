@@ -45,6 +45,7 @@ Use at least a 12-character password policy in Supabase Auth; enable compromised
 - Complete PDF page indexing, structured table evidence, per-file indexing progress, and focused answers for multi-question prompts.
 - Direct email workspace invitations, role management, and audit activity.
 - Durable PostgreSQL jobs with leases, bounded retries, idempotent chunk indexing, and immediate removal from search on deletion.
+- Native extraction runs in a disposable process with a memory guard; complex PDFs can fall back to aligned text. Workspace loading has a timeout and retry screen.
 - Per-workspace document/storage/question limits; authenticated API, RLS, and private Storage policies.
 
 ## Supported formats and limits

@@ -6,6 +6,16 @@ API readiness: https://atlas-varanasi-api.onrender.com/health/ready
 
 Repository: https://github.com/Sai6156/teamvaranasiatlas
 
+## Workspace loading recovery
+
+The frontend loading fix is live on commit `aa51700`, Vercel deployment `dpl_4uKafrNsknxZYSbP9VEbjBRo8ga2`. The backend extraction isolation and aligned-text fallback run on commit `aab9e1a`.
+
+Production logs and metrics showed a PDF extraction job consuming the API's CPU quota and approaching the 512 MB hosting memory limit, while its lease heartbeat and page progress stalled. Readiness and workspace requests timed out, although Supabase Auth and the database responded normally. Restarting with the indexer temporarily disabled restored requests. Indexing is now enabled again, with native parsing and chunking performed in a disposable, lower-priority child process. Its memory is monitored and cancellation terminates the child and its OCR process group. Native PDF caches are released between pages. PDFs that exceed geometric extraction memory retry with native text and aligned source columns; the page coverage and fallback mode are disclosed in document metadata.
+
+Workspace discovery has a 20-second deadline, cancellation of superseded requests, and an explicit retry/sign-out screen. A failed discovery no longer sends an existing user to new-workspace onboarding. Session retrieval/refresh also has a deadline; other API calls are bounded without limiting answer streams.
+
+Live isolated browser verification: a returning account opened its workspace in 4.01 seconds; a persisted-session reload completed in 3.21 seconds. A deliberately stalled workspace request displayed recovery after 21.30 seconds including page-load time, and Retry opened the workspace in 3.95 seconds. A simulated HTTP 503 also displayed recovery without duplicate onboarding. These are individual observations, not latency guarantees. The production frontend build and TypeScript checks passed. The 40-test backend suite passed, and the subsequent subprocess page-progress regression passed with all five parser-isolation tests.
+
 ## Email-code rollout — live
 
 The email-code signup/reset screens and direct Brevo invitation delivery are deployed. Render runs backend commit `fc762a4`; Vercel runs frontend commit `2479b42` (deployment `dpl_BCosvpRmgf4YdUDSGf2QVDZhbZ7H`). The verified sender is configured server-side, and Render's two outbound ranges have been authorized in Brevo. Credentials remain outside the repository and browser bundle.
