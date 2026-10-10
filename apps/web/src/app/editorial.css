@@ -81,3 +81,23 @@ button:focus-visible,a:focus-visible{outline-color:#334de4}
 @media(max-height:720px){.chat-layout .chat-top>div>span,.chat-layout .composer-note{display:none}.chat-layout .chat-content{padding-top:6px}.chat-layout .app-header{height:46px;min-height:46px}.chat-layout .chat-top{min-height:36px;padding-bottom:6px}.chat-layout .demo-chat-question-panel{max-height:120px}.chat-layout .chat-messages{padding-top:12px}.chat-layout .chat-composer-wrap{padding-bottom:8px}}
 @media(max-width:680px){.chat-layout .chat-content{padding-inline:14px}.chat-layout .app-header{padding-inline:14px}.chat-layout .chat-top strong{font-size:13px}.chat-layout .chat-top>div>span{display:none}.chat-layout .composer-note{display:none}.chat-layout .composer-tools .composer-tool:first-child{display:none}.chat-layout .demo-chat-picker-bar label{font-size:9px}.chat-layout .demo-chat-picker-bar select{font-size:11px;min-height:28px}.chat-layout .chat-top{gap:6px}.chat-layout .chat-top .btn{font-size:10px;padding:6px 8px}.chat-layout .chat-top .jump-latest{font-size:9px;padding:6px}.chat-layout .demo-chat-question-panel{max-height:130px}.chat-layout .chat-composer-wrap{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
 
+/* Authentication: explicit high-contrast colours on both panels. */
+.auth-story{background:#17233c;color:#f5f7ff}
+.auth-story .brand,.auth-story h1,.auth-testimonial p{color:#f5f7ff}
+.auth-story .brand-mark>span{background:#91adff}
+.auth-story .brand-dot{color:#91adff}
+.auth-story .eyebrow,.auth-testimonial svg{color:#a9bfff}
+.auth-story-copy>p,.auth-testimonial>span,.auth-story-footer{color:#c5cfe3}
+.auth-testimonial{border-top-color:#40506e}
+.auth-story::before{border-color:#596f9d;background:transparent;box-shadow:0 0 0 50px #263959,0 0 0 100px #21314f;opacity:.55;pointer-events:none}
+.auth-story>a,.auth-story-footer{position:relative;z-index:1}
+.auth-main{background:#fafbff;color:#17233c}
+.auth-main .back-home,.auth-form-wrap>p,.auth-bottom,.auth-bottom p{color:#536078}
+.auth-form-wrap h2,.auth-form-wrap label{color:#17233c}
+.auth-form-wrap .eyebrow,.auth-main a:not(.back-home){color:#2842cb}
+.auth-main a:hover{color:#162f9f}
+.auth-icon{background:#edf1ff;border-color:#d4ddfa;color:#334de4}
+.auth-form-wrap input{background:#fff;color:#17233c;border-color:#c6cfdf}
+.auth-form-wrap input::placeholder{color:#65728a;opacity:1}
+.auth-form-wrap input:focus{border-color:#334de4;box-shadow:0 0 0 3px #334de41a}
+.auth-main .password-toggle{color:#536078}
