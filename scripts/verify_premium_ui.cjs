@@ -52,6 +52,18 @@ async function main() {
       ),
       false,
     );
+    await page.locator("#how-it-works").scrollIntoViewIfNeeded();
+    await page.locator(".feature-grid article").first().waitFor();
+    await page.waitForFunction(
+      () =>
+        getComputedStyle(document.querySelector(".feature-grid article"))
+          .opacity === "1",
+    );
+    await page.locator("#security").scrollIntoViewIfNeeded();
+    await page.waitForFunction(
+      () =>
+        getComputedStyle(document.querySelector("#security")).opacity === "1",
+    );
     await page.screenshot({
       path: ".runtime/premium-landing-mobile.png",
       fullPage: true,
