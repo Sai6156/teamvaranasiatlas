@@ -224,190 +224,45 @@ function Landing({ session }: { session: Session | null }) {
     }
     return () => observer.disconnect();
   }, []);
+  const destination = session ? "/app" : "/signup";
   return (
-    <div className="landing" ref={landingRoot}>
-      <nav className="landing-nav">
-        <Link href="/" aria-label="Atlas home">
-          <Logo />
-        </Link>
-        <div className="nav-links">
-          <a href="#how-it-works">How it works</a>
-          <a href="#security">Built for trust</a>
-          <Link href="/login">Log in</Link>
-          <Link
-            className="btn primary small"
-            href={session ? "/app" : "/signup"}
-          >
-            {session ? "Open workspace" : "Create your workspace"}
-            <ArrowUpRight size={16} />
-          </Link>
-        </div>
+    <div className="atlas-editorial" ref={landingRoot}>
+      <nav className="editorial-nav" aria-label="Main navigation">
+        <Link href="/" aria-label="Atlas home"><Logo /></Link>
+        <span className="nav-descriptor">A shared mind for your company.</span>
+        <div><a href="#how-it-works">The approach</a><Link href="/login">Log in</Link><Link className="editorial-cta compact" href={destination}>Open Atlas <ArrowUpRight size={16}/></Link></div>
       </nav>
       <main>
-        <section className="hero">
-          <div className="hero-copy">
-            <span className="eyebrow">
-              <span className="live-dot" /> KNOWLEDGE, WITHOUT THE SEARCH PARTY
-            </span>
-            <h1>
-              Your company knows.
-              <br />
-              <span>Now everyone can.</span>
-            </h1>
-            <p>
-              The policy in a PDF. The process in a doc. The answer buried in
-              your code. Bring it together, ask a question, and get straight to
-              the source.
-            </p>
-            <div className="hero-actions">
-              <Link className="btn primary" href={session ? "/app" : "/signup"}>
-                Find your next answer
-                <ArrowRight size={18} />
-              </Link>
-              <Link
-                className="btn secondary"
-                href={session ? "/app" : "/signup"}
-              >
-                <Globe size={16} />
-                Explore demo companies
-              </Link>
-              <a className="text-link" href="#how-it-works">
-                See how it works
-                <ChevronRight size={16} />
-              </a>
-            </div>
-            <div className="hero-trust">
-              <ShieldCheck size={15} />
-              <span>Private workspaces</span>
-              <span className="divider-dot">·</span>
-              <span>Answers with evidence</span>
-              <span className="divider-dot">·</span>
-              <span>Your files, connected</span>
-            </div>
-          </div>
-          <div className="hero-visual">
-            <div className="visual-label">
-              <span className="live-dot" /> A LITTLE LESS SEARCHING. A LOT MORE
-              KNOWING.
-            </div>
-            <div className="preview-window">
-              <div className="preview-top">
-                <Logo />
-                <span>
-                  <LockKeyhole size={12} />
-                  Workspace preview
-                </span>
-              </div>
-              <KnowledgePreview />
-            </div>
-            <div className="floating-file float-a">
-              <span className="file-tile purple">
-                <FileText size={19} />
-              </span>
-              <div>
-                People handbook.pdf<small>People & culture</small>
-              </div>
-              <CheckCircle2 size={15} />
-            </div>
-            <div className="floating-file float-b">
-              <span className="file-tile orange">
-                <FileSpreadsheet size={19} />
-              </span>
-              <div>
-                Operations.xlsx<small>Operations</small>
-              </div>
-              <CheckCircle2 size={15} />
-            </div>
-            <span className="visual-caption">
-              Illustrative preview. Your answers come from your own files.
-            </span>
+        <section className="editorial-hero">
+          <div className="edition-label"><span>COMPANY KNOWLEDGE, CONNECTED</span><span>BUILT TO BE ASKED.</span></div>
+          <h1>Everything you know.<br/><span>Within <i>reach.</i></span><span className="hero-asterisk" aria-hidden="true">✳</span></h1>
+          <div className="hero-baseline"><span className="chapter-mark">01 / THE IDEA</span><p>Your company’s next answer is already in its files.<br/>Atlas brings it to the surface. With the source attached.</p><Link className="editorial-cta" href={destination}>Find your next answer <ArrowUpRight size={22}/></Link></div>
+          <div className="knowledge-composition" aria-label="Company documents become a cited answer">
+            <div className="composition-grid" aria-hidden="true"/>
+            <div className="composition-caption"><span className="live-dot"/> FROM FILES TO CLARITY</div>
+            <div className="archive-sheet sheet-back" aria-hidden="true"><span>ENGINEERING / 03</span><FileCode2 size={30}/><strong>The way<br/>we build.</strong><div className="sheet-lines"/></div>
+            <div className="archive-sheet sheet-front" aria-hidden="true"><span>PEOPLE & CULTURE / 01</span><span className="sheet-monogram">Aa</span><strong>A good place<br/>to begin.</strong><small>Employee handbook · PDF</small></div>
+            <div className="composition-connector" aria-hidden="true"><span/><ArrowRight size={25}/></div>
+            <div className="answer-slip"><div className="slip-top"><span>ASK ATLAS</span><span>01 — ANSWER</span></div><p>What do I need<br/>for my first day?</p><div className="slip-answer">Your laptop. Multifactor authentication.<br/>A hello to your buddy. <sup>[1]</sup></div><span className="slip-citation"><FileText size={14}/> Onboarding.docx <span>¶ 1 ↗</span></span><small>Illustrative answer · fictional starter files</small></div>
+            <span className="composition-index">DOCUMENTS IN. UNDERSTANDING OUT.</span>
           </div>
         </section>
-        <div className="format-band">
-          <span>ONE HOME FOR YOUR COMPANY KNOWLEDGE</span>
-          <div>
-            <FileText size={18} />
-            PDF & documents
-          </div>
-          <div>
-            <FileSpreadsheet size={18} />
-            Spreadsheets
-          </div>
-          <div>
-            <FileCode2 size={18} />
-            Code & Markdown
-          </div>
-          <div>
-            <BookOpen size={18} />
-            Presentations & more
-          </div>
-        </div>
-        <section className="how-section" id="how-it-works">
-          <div className="section-heading">
-            <span className="eyebrow">LESS FRICTION. MORE FLOW.</span>
-            <h2>
-              From scattered files
-              <br />
-              to shared understanding.
-            </h2>
-            <p>A familiar workspace. A much faster way to find what matters.</p>
-          </div>
+        <section className="editorial-demo-band"><span className="chapter-mark">THE PUBLIC DEMO COLLECTION</span><p>10 companies.<br/><strong>A world of questions.</strong></p><div><span>INDIA + GLOBAL / 30 SOURCE FILES</span><Link href={destination}>Explore demo companies <ArrowUpRight size={20}/></Link><small>Sign in to explore public company documents.</small></div></section>
+        <section className="editorial-method" id="how-it-works">
+          <div className="editorial-section-heading"><span className="chapter-mark">02 / THE APPROACH</span><h2>Less searching.<br/><i>More understanding.</i></h2></div>
           <div className="feature-grid">
-            <article data-reveal>
-              <span className="step-number">01</span>
-              <UploadCloud />
-              <h3>Bring your knowledge.</h3>
-              <p>
-                Upload policies, manuals, spreadsheets, and code. Organize them
-                into collections your team understands.
-              </p>
-            </article>
-            <article data-reveal>
-              <span className="step-number">02</span>
-              <MessageSquare />
-              <h3>Ask in your own words.</h3>
-              <p>
-                Get useful answers across your workspace, with the context to
-                keep the conversation going.
-              </p>
-            </article>
-            <article data-reveal>
-              <span className="step-number">03</span>
-              <BookOpen />
-              <h3>Follow the evidence.</h3>
-              <p>
-                Open the exact passage behind an answer. A page, a paragraph, a
-                row, or a line of code.
-              </p>
-            </article>
+            <article data-reveal><span className="step-number">01</span><h3>Bring what you know.</h3><p>Policies, reports, spreadsheets, code. Put your company’s knowledge in one organized workspace.</p><div className="format-tags"><span>.PDF</span><span>.DOCX</span><span>.CSV</span><span>.PY</span></div></article>
+            <article data-reveal><span className="step-number">02</span><h3>Ask the actual question.</h3><p>Use your own words. Atlas retrieves relevant passages from your files to build an answer.</p><span className="method-example">“What’s our travel policy?” <ArrowUpRight size={18}/></span></article>
+            <article data-reveal><span className="step-number">03</span><h3>Know where it came from.</h3><p>Follow a citation to the original passage. Check the page, paragraph, spreadsheet row, or line of code.</p><span className="method-example">[1] Travel policy.pdf <span>Page 1</span></span></article>
           </div>
         </section>
-        <section className="trust-section" id="security" data-reveal>
-          <span className="trust-symbol">
-            <ShieldCheck size={45} />
-          </span>
-          <div>
-            <span className="eyebrow">
-              COMPANY KNOWLEDGE DESERVES A PRIVATE HOME
-            </span>
-            <h2>Built around your boundaries.</h2>
-            <p>
-              Verified accounts, private file storage, organization-scoped
-              access, and administrator-controlled uploads. Your team’s
-              knowledge stays inside its workspace.
-            </p>
-          </div>
-          <Link className="btn secondary" href="/signup">
-            Create a secure workspace
-            <ArrowRight size={17} />
-          </Link>
+        <section className="editorial-evidence">
+          <div className="evidence-copy"><span className="chapter-mark">03 / SEE FOR YOURSELF</span><h2>An answer is good.<br/><i>Evidence is better.</i></h2><p>Choose a question. Open its source. This is how a conversation becomes something your team can act on.</p><span className="evidence-note">INTERACTIVE PREVIEW / SAMPLE KNOWLEDGE</span></div>
+          <div className="preview-window"><div className="preview-top"><Logo/><span><LockKeyhole size={12}/> Workspace preview</span></div><KnowledgePreview/></div>
         </section>
+        <section className="editorial-security" id="security" data-reveal><span className="chapter-mark">04 / BUILT FOR TRUST</span><h2>Shared with your team.<br/><i>On your terms.</i></h2><div className="security-details"><p>Verified accounts. Private file storage. Workspace-scoped access. Administrators decide who joins and what gets uploaded.</p><Link href={destination}>Create your workspace <ArrowUpRight size={23}/></Link></div><ShieldCheck className="security-seal" size={100} strokeWidth={1}/></section>
       </main>
-      <footer className="landing-footer">
-        <Logo />
-        <span>Built by Team Varanasi · TriCity AI Hackathon</span>
-        <span>Good answers start with good sources.</span>
-      </footer>
+      <footer className="editorial-footer"><div><span>GOOD ANSWERS START WITH GOOD SOURCES.</span><a href="#">Back to top ↑</a></div><div className="footer-wordmark" aria-hidden="true">atlas<span>↗</span></div><div><span>Team Varanasi / TriCity AI Hackathon</span><span>Company knowledge. Within reach.</span></div></footer>
     </div>
   );
 }
@@ -3094,3 +2949,4 @@ function TeamView({
     </>
   );
 }
+

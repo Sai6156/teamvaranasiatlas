@@ -44,6 +44,7 @@ async function main() {
       /team lead/,
     );
     await page.getByRole("button", { name: "First day", exact: true }).click();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: ".runtime/premium-landing-desktop.png" });
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(
@@ -250,3 +251,4 @@ main().catch((e) => {
   console.error(e.message);
   process.exit(1);
 });
+
