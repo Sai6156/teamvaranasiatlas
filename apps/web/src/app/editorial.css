@@ -59,7 +59,7 @@ button:focus-visible,a:focus-visible{outline-color:#334de4}
 .app-main.chat-layout{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 .chat-layout .app-header{height:54px;min-height:54px;flex-shrink:0;padding-block:8px}
 .chat-layout .workspace-footer{display:none}
-.chat-layout .chat-content{height:auto;flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 28px 0;overflow:hidden}
+.chat-layout .chat-content{height:auto;max-height:none;flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 28px 0;overflow:hidden}
 .chat-layout .chat-top{min-height:43px;padding:0 0 10px;margin:0;gap:12px}
 .chat-layout .chat-top>div{flex:1}
 .chat-layout .chat-top .btn{min-height:32px;padding:7px 11px;font-size:11px}
@@ -80,3 +80,4 @@ button:focus-visible,a:focus-visible{outline-color:#334de4}
 .chat-content:has(.demo-chat-picker) .chat-top .jump-latest,.chat-layout .chat-top .jump-latest{position:static;transform:none;align-self:auto;margin:0;padding:6px 9px;box-shadow:none;border-radius:5px;font-size:10px;flex-shrink:0}
 @media(max-height:720px){.chat-layout .chat-top>div>span,.chat-layout .composer-note{display:none}.chat-layout .chat-content{padding-top:6px}.chat-layout .app-header{height:46px;min-height:46px}.chat-layout .chat-top{min-height:36px;padding-bottom:6px}.chat-layout .demo-chat-question-panel{max-height:120px}.chat-layout .chat-messages{padding-top:12px}.chat-layout .chat-composer-wrap{padding-bottom:8px}}
 @media(max-width:680px){.chat-layout .chat-content{padding-inline:14px}.chat-layout .app-header{padding-inline:14px}.chat-layout .chat-top strong{font-size:13px}.chat-layout .chat-top>div>span{display:none}.chat-layout .composer-note{display:none}.chat-layout .composer-tools .composer-tool:first-child{display:none}.chat-layout .demo-chat-picker-bar label{font-size:9px}.chat-layout .demo-chat-picker-bar select{font-size:11px;min-height:28px}.chat-layout .chat-top{gap:6px}.chat-layout .chat-top .btn{font-size:10px;padding:6px 8px}.chat-layout .chat-top .jump-latest{font-size:9px;padding:6px}.chat-layout .demo-chat-question-panel{max-height:130px}.chat-layout .chat-composer-wrap{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+
