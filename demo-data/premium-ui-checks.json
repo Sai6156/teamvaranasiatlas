@@ -6,6 +6,9 @@
   "four_local_questions": true,
   "desktop_and_mobile": true,
   "reduced_motion": true,
+  "compact_composer": true,
+  "short_screen_answer_viewport": true,
+  "long_answer_scroll": true,
   "page_errors": 0,
   "paid_model_requests": 0
 }

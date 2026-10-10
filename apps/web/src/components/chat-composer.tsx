@@ -29,7 +29,7 @@ export default function ChatComposer({
     const element = input.current;
     if (!element) return;
     element.style.height = "auto";
-    element.style.height = `${Math.min(Math.max(element.scrollHeight, 48), 240)}px`;
+    element.style.height = `${Math.min(Math.max(element.scrollHeight, 28), 96)}px`;
   }, [value]);
   useEffect(() => {
     if (focusSignal) {
@@ -146,7 +146,7 @@ export default function ChatComposer({
           onKeyDown={(event) => key(event)}
           aria-label="Your question"
           placeholder="Ask a question. Find a little clarity."
-          rows={2}
+          rows={1}
           maxLength={20000}
         />
         <div className="composer-tools">

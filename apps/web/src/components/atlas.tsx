@@ -1331,7 +1331,7 @@ function WorkspaceApp({ session }: { session: Session }) {
           </button>
         </div>
       </aside>
-      <div className="app-main">
+      <div className={`app-main ${view === "ask" ? "chat-layout" : ""}`}>
         <header className="app-header">
           <div>
             <button
@@ -1756,6 +1756,25 @@ function WorkspaceApp({ session }: { session: Session }) {
                   <strong>Ask Atlas</strong>
                   <span>Your company knowledge, in conversation.</span>
                 </div>
+              {showLatest && (
+                <button
+                  className="jump-latest"
+                  onClick={() => {
+                    const element = messagesViewport.current;
+                    if (element) {
+                      followLatest.current = true;
+                      element.scrollTo({
+                        top: element.scrollHeight,
+                        behavior: "smooth",
+                      });
+                      setShowLatest(false);
+                    }
+                  }}
+                >
+                  <ArrowUp size={14} />
+                  Jump to latest
+                </button>
+              )}
                 <button
                   className="btn secondary small"
                   onClick={newChat}
@@ -1969,27 +1988,9 @@ function WorkspaceApp({ session }: { session: Session }) {
                 ))}
                 <div ref={end} />
               </div>
-              {showLatest && (
-                <button
-                  className="jump-latest"
-                  onClick={() => {
-                    const element = messagesViewport.current;
-                    if (element) {
-                      followLatest.current = true;
-                      element.scrollTo({
-                        top: element.scrollHeight,
-                        behavior: "smooth",
-                      });
-                      setShowLatest(false);
-                    }
-                  }}
-                >
-                  <ArrowUp size={14} />
-                  Jump to latest
-                </button>
-              )}
               <div className="chat-composer-wrap">
                 <DemoChatPicker
+                  hasMessages={messages.length > 0}
                   companies={demoCompanies}
                   selected={demoCompany}
                   disabled={streaming || historyLoading}

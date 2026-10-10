@@ -207,6 +207,20 @@ async function main() {
     await app
       .getByRole("textbox", { name: "Your question", exact: true })
       .fill("");
+    assert.equal(await app.locator(".demo-chat-question-panel").count(), 0);
+    await app.setViewportSize({ width: 1280, height: 600 });
+    const compact = await app.locator(".chat-messages").boundingBox();
+    assert.ok(compact.height > 300, `Answer viewport too small: ${compact.height}`);
+    const composer = await app.locator(".chat-composer").boundingBox();
+    assert.ok(composer.height < 70, `Composer too tall: ${composer.height}`);
+    await app.screenshot({ path: ".runtime/chat-short-screen.png" });
+    await app.getByRole("textbox", { name: "Your question", exact: true }).fill("A longer question with several details. ".repeat(50));
+    assert.ok((await app.locator(".chat-composer textarea").boundingBox()).height <= 97);
+    await app.getByRole("button", { name: "Expand prompt editor", exact: true }).click();
+    await app.getByRole("dialog", { name: "Review your full prompt" }).waitFor();
+    await app.getByRole("button", { name: "Close prompt editor" }).click();
+    await app.getByRole("textbox", { name: "Your question", exact: true }).fill("");
+    await app.setViewportSize({ width: 1440, height: 1000 });
     await app.screenshot({ path: ".runtime/premium-chat-desktop.png" });
     await app.setViewportSize({ width: 390, height: 844 });
     await app.waitForFunction(
@@ -225,6 +239,17 @@ async function main() {
       .locator(".workspace-content")
       .evaluate((el) => getComputedStyle(el).animationName);
     assert.equal(animation, "none");
+    await app.setViewportSize({ width: 1280, height: 600 });
+    await app.locator(".chat-messages").evaluate((element) => {
+      element.innerHTML = Array.from({ length: 40 }, (_, index) => `<div class="message"><div class="markdown"><p>Answer passage ${index + 1}: this long response verifies that reading stays inside the conversation viewport while controls remain accessible.</p></div></div>`).join("");
+      element.scrollTop = 1;
+    });
+    await app.getByRole("button", { name: "Jump to latest" }).waitFor();
+    assert.equal(await app.locator(".chat-top .jump-latest").count(), 1);
+    await app.locator(".chat-messages").hover();
+    await app.mouse.wheel(0, 300);
+    await app.waitForFunction(() => document.querySelector(".chat-messages").scrollTop > 100);
+    await app.screenshot({ path: ".runtime/chat-long-answer-short-screen.png" });
     await appContext.close();
     assert.deepEqual(errors, []);
     const result = {
@@ -235,6 +260,9 @@ async function main() {
       four_local_questions: true,
       desktop_and_mobile: true,
       reduced_motion: true,
+      compact_composer: true,
+      short_screen_answer_viewport: true,
+      long_answer_scroll: true,
       page_errors: 0,
       paid_model_requests: 0,
     };

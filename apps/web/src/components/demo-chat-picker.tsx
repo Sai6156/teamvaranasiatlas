@@ -65,12 +65,14 @@ export default function DemoChatPicker({
   companies,
   selected,
   disabled,
+  hasMessages,
   onSelect,
   onQuestion,
 }: {
   companies: Workspace[];
   selected: Workspace | null;
   disabled: boolean;
+  hasMessages: boolean;
   onSelect: (id: string) => void;
   onQuestion: (question: string) => void;
 }) {
@@ -80,6 +82,9 @@ export default function DemoChatPicker({
     setQuestions(selected ? chooseQuestions(selected.demo_slug || "") : []);
     setExpanded(true);
   }, [selected?.id, selected?.demo_slug]);
+  useEffect(() => {
+    if (disabled || hasMessages) setExpanded(false);
+  }, [disabled, hasMessages]);
   if (!companies.length) return null;
   return (
     <section className="demo-chat-picker" aria-label="Demo company questions">
@@ -147,7 +152,10 @@ export default function DemoChatPicker({
                 key={question}
                 disabled={disabled}
                 title={question}
-                onClick={() => onQuestion(question)}
+                onClick={() => {
+                  setExpanded(false);
+                  onQuestion(question);
+                }}
               >
                 <span>{question}</span>
                 <ArrowUpRight size={13} />
