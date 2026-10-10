@@ -113,6 +113,10 @@ def model_payload(
             payload["max_completion_tokens"] = payload.pop("max_tokens")
     else:
         payload["temperature"] = 0.15
+        if model.startswith(("z-ai/", "deepseek/")):
+            payload["reasoning"] = {"effort": "low", "exclude": True}
+        elif model.startswith("qwen/"):
+            payload["reasoning"] = {"max_tokens": 256, "exclude": True}
     return payload
 
 
@@ -192,6 +196,8 @@ async def generate(
                                     )
                                 content = choice.get("delta", {}).get("content")
                                 if content:
+                                    if not emitted and not content.strip():
+                                        continue
                                     emitted = True
                                     yield {"type": "token", "text": content}
                         if emitted:

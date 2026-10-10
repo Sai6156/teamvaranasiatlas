@@ -152,7 +152,7 @@ async def retrieve(
     selected = {}
     protected = []
     # Reserve evidence for every requested subquestion before global ranking.
-    minimum = 2 if len(queries) > 1 else 8
+    minimum = 6 if len(queries) > 3 else 2 if len(queries) > 1 else 8
     for rows in ranked:
         for source in rows[:minimum]:
             if source["id"] not in selected:

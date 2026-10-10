@@ -31,6 +31,7 @@ from .extraction import SUPPORTED_EXTENSIONS
 from .llm import ConfigurationError, ModelUnavailable, generate
 from .grounding import citation_support, abstention
 from .retrieval import retrieve
+from .batch_answer import answer_batch
 
 logger = logging.getLogger("atlas.api")
 
@@ -568,11 +569,16 @@ async def chat(
                         + body.question
                     )
                 prompt.append({"role": "user", "content": current_question})
-                async for item in generate(
-                    prompt,
-                    max_tokens=min(6000, 2000 + len(queries) * 400),
-                    timeout_seconds=120,
-                ):
+                answer_stream = (
+                    answer_batch(SYSTEM, queries, sources)
+                    if len(queries) > 3
+                    else generate(
+                        prompt,
+                        max_tokens=min(4000, 2000 + len(queries) * 400),
+                        timeout_seconds=90,
+                    )
+                )
+                async for item in answer_stream:
                     if await request.is_disconnected():
                         return
                     if item["type"] == "token":
