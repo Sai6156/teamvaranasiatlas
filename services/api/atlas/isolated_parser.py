@@ -21,13 +21,25 @@ def resident_mb(pid: int) -> float:
     return 0  # /proc isn't available on Windows.
 
 
-async def prepare(data: bytes, name: str, progress: list[int]):
+class ParserMemoryLimit(ValueError):
+    pass
+
+
+async def prepare(
+    data: bytes, name: str, progress: list[int], lightweight_pdf: bool = False
+):
     config = settings()
     with tempfile.TemporaryDirectory(prefix="atlas-parse-") as temporary:
         directory = Path(temporary)
         await asyncio.to_thread((directory / "input").write_bytes, data)
         (directory / "request.json").write_text(
-            json.dumps({"name": name, "max_chunks": config.max_chunks})
+            json.dumps(
+                {
+                    "name": name,
+                    "max_chunks": config.max_chunks,
+                    "lightweight_pdf": lightweight_pdf,
+                }
+            )
         )
         process = await asyncio.create_subprocess_exec(
             sys.executable,
@@ -45,7 +57,7 @@ async def prepare(data: bytes, name: str, progress: list[int]):
             async with asyncio.timeout(config.ingestion_timeout_seconds):
                 while not waiter.done():
                     if resident_mb(process.pid) > config.parser_memory_limit_mb:
-                        raise ValueError(
+                        raise ParserMemoryLimit(
                             "This file needs more extraction memory than the current server allows. Split it into smaller files and retry."
                         )
                     try:
@@ -56,6 +68,10 @@ async def prepare(data: bytes, name: str, progress: list[int]):
                         pass
                     await asyncio.wait({waiter}, timeout=0.5)
             result_file = directory / "result.json"
+            try:
+                progress[:] = json.loads((directory / "progress.json").read_text())
+            except (OSError, ValueError):
+                pass
             if not result_file.exists():
                 raise RuntimeError("The extraction process exited unexpectedly.")
             if result_file.stat().st_size > 64 * 1024 * 1024:

@@ -60,7 +60,10 @@ def layout(page, rect) -> str:
 
 
 def extract_pdf(
-    data: bytes, progress: Callable[[int, int], None] | None = None
+    data: bytes,
+    progress: Callable[[int, int], None] | None = None,
+    *,
+    detect_tables: bool = True,
 ) -> tuple[list[Block], str | None]:
     blocks = BoundedBlocks()
     ocr_count = 0
@@ -124,8 +127,28 @@ def extract_pdf(
                     text = clean(page.get_text("text", clip=panel, sort=True))
                     if text:
                         blocks.append(Block(text, {**base, "panel": panel_index + 1}))
+                        if not detect_tables:
+                            aligned = layout(page, panel)
+                            prefix = (
+                                f"COLUMN LAYOUT EVIDENCE — {label}\n"
+                                + "\n".join(aligned.splitlines()[:20])[:2000]
+                                + "\n"
+                            )
+                            blocks.append(
+                                Block(
+                                    prefix + aligned,
+                                    {
+                                        **base,
+                                        "kind": "table",
+                                        "structured": False,
+                                        "panel": panel_index + 1,
+                                        "label": label + " · aligned text columns",
+                                        "table_header": prefix,
+                                    },
+                                )
+                            )
                 # Process one page at a time; figures/images remain outside model context.
-                if len(re.findall(r"\d", full_text)) >= 8:
+                if detect_tables and len(re.findall(r"\d", full_text)) >= 8:
                     try:
                         found = page.find_tables()
                         for table_index, table in enumerate(found.tables):
@@ -200,9 +223,12 @@ def extract_pdf(
                         table_errors += 1
             if progress:
                 progress(page_number, len(document))
+            pymupdf.TOOLS.store_shrink(100)
     if not blocks:
         raise ValueError("No readable text was found in this PDF.")
     note = f"All {total_pages} PDF pages read; {table_count} structured tables indexed."
+    if not detect_tables:
+        note += " Memory-safe mode retained native text and aligned columns; geometric table detection was skipped."
     if ocr_count:
         note += f" {ocr_count} pages used OCR; verify important numbers."
     if table_errors:

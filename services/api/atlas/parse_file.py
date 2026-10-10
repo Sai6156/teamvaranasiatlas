@@ -19,9 +19,13 @@ def main(directory: Path):
         pending.replace(directory / "progress.json")
 
     try:
-        blocks, note = extract(
-            (directory / "input").read_bytes(), request["name"], progress
-        )
+        data = (directory / "input").read_bytes()
+        if request.get("lightweight_pdf") and request["name"].lower().endswith(".pdf"):
+            from .pdf_extract import extract_pdf
+
+            blocks, note = extract_pdf(data, progress, detect_tables=False)
+        else:
+            blocks, note = extract(data, request["name"], progress)
         chunks = chunk_blocks(blocks)
         if len(chunks) > request["max_chunks"]:
             raise ValueError(

@@ -3,7 +3,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from .config import settings
 from .db import Database
-from .isolated_parser import prepare
+from .isolated_parser import prepare, ParserMemoryLimit
 from .llm import embed, ConfigurationError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -91,7 +91,24 @@ async def process(db: Database, job: dict):
                 "GET",
                 "/storage/v1/object/company-documents/" + document["storage_path"],
             )
-            chunks, note = await prepare(result.content, document["name"], progress)
+            is_pdf = document["name"].lower().endswith(".pdf")
+            lightweight_pdf = is_pdf and "extraction memory" in (
+                job.get("last_error") or ""
+            )
+            try:
+                chunks, note = await prepare(
+                    result.content,
+                    document["name"],
+                    progress,
+                    lightweight_pdf=lightweight_pdf,
+                )
+            except ParserMemoryLimit:
+                if not is_pdf or lightweight_pdf:
+                    raise
+                progress[:] = [0, 0]
+                chunks, note = await prepare(
+                    result.content, document["name"], progress, lightweight_pdf=True
+                )
             await db.update(
                 "documents",
                 {

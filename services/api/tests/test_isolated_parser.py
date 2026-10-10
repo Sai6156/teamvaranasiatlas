@@ -43,3 +43,27 @@ async def test_memory_guard_rejects_file_and_stops_parser(monkeypatch):
     monkeypatch.setattr(isolated_parser, "resident_mb", lambda pid: 1000)
     with pytest.raises(ValueError, match="extraction memory"):
         await isolated_parser.prepare(b"text", "test.txt", [0, 0])
+
+
+def test_low_memory_pdf_preserves_every_page_and_aligned_values(monkeypatch):
+    import pymupdf
+    from atlas.pdf_extract import extract_pdf
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Expensive geometric detection must be skipped")
+
+    monkeypatch.setattr(pymupdf.Page, "find_tables", forbidden)
+    document = pymupdf.open()
+    for _ in range(3):
+        page = document.new_page()
+        page.insert_text((40, 40), "Region   Machines\nNational   8\nInternational   1")
+    blocks, note = extract_pdf(document.tobytes(), detect_tables=False)
+    document.close()
+    assert {block.location["page"] for block in blocks} == {1, 2, 3}
+    assert any(
+        "National" in block.text
+        and "8" in block.text
+        and block.location.get("kind") == "table"
+        for block in blocks
+    )
+    assert "native text and aligned columns" in note
