@@ -740,6 +740,7 @@ function WorkspaceApp({ session }: { session: Session }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+  const [showDemoLibrary, setShowDemoLibrary] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [view, setView] = useState("overview");
@@ -813,7 +814,7 @@ function WorkspaceApp({ session }: { session: Session }) {
       if (version !== workspaceLoadVersion.current) return;
       setWorkspaces(rows);
       setWorkspace(
-        rows.find((w) => w.id === localStorage.getItem("atlas-workspace")) ||
+        rows.find((w) => !w.is_demo && w.id === localStorage.getItem("atlas-workspace")) ||
           rows.find((w) => !w.is_demo) ||
           null,
       );
@@ -1118,15 +1119,19 @@ function WorkspaceApp({ session }: { session: Session }) {
           </button>
         </div>
       );
-  if (!workspace && !creatingWorkspace && workspaces.some((w) => w.is_demo))
+  if (!workspace && showDemoLibrary && !creatingWorkspace && workspaces.some((w) => w.is_demo))
     return (
       <DemoLibrary
         workspaces={workspaces}
         onSelect={(selected) => {
+          setShowDemoLibrary(false);
           setWorkspace(selected);
           setView("overview");
         }}
-        onCreate={() => setCreatingWorkspace(true)}
+        onCreate={() => {
+          setShowDemoLibrary(false);
+          setCreatingWorkspace(true);
+        }}
         onSignOut={signOut}
       />
     );
@@ -1136,14 +1141,18 @@ function WorkspaceApp({ session }: { session: Session }) {
         name={fullName}
         error={error}
         onCreated={(created) => {
+          setCreatingWorkspace(false);
+          setShowDemoLibrary(false);
+          setView("overview");
           setWorkspaces([...workspaces, created]);
           setWorkspace(created);
           setError("");
         }}
         onSignOut={signOut}
         onBack={
-          workspaces.length
+          workspaces.some((w) => !w.is_demo)
             ? () => {
+                setShowDemoLibrary(false);
                 setCreatingWorkspace(false);
                 setWorkspace(workspaces.find((w) => !w.is_demo) || null);
               }
@@ -1225,6 +1234,7 @@ function WorkspaceApp({ session }: { session: Session }) {
             className="demo-library-link"
             disabled={streaming}
             onClick={() => {
+              setShowDemoLibrary(true);
               setCreatingWorkspace(false);
               setWorkspace(null);
               setMenu(false);
@@ -2152,11 +2162,7 @@ function Onboarding({
           <FolderOpen size={33} />
         </span>
         <span className="eyebrow">LET’S MAKE IT YOURS</span>
-        <h1>
-          A home for your
-          <br />
-          company’s knowledge.
-        </h1>
+        <h1>Name your private workspace</h1>
         <p>
           Welcome, {name.split(" ")[0]}. Create a private workspace to bring
           your documents and your team together.
