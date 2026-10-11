@@ -78,4 +78,3 @@ language sql stable security invoker set search_path='' as $$
 $$;
 revoke all on function public.search_chunks_v2(uuid,text,extensions.vector,integer,text) from public,anon;
 grant execute on function public.search_chunks_v2(uuid,text,extensions.vector,integer,text) to authenticated;
-
