@@ -8,7 +8,7 @@ npm run build
 npm run typecheck
 ```
 
-The current baseline has 56 passing backend tests covering extraction, archive limits, isolated parsing, authorization, invitations/email codes, retrieval, grounding, and model/key routing. Frontend production build and TypeScript checks pass. CI repeats these checks without production credentials.
+The current baseline has 57 passing backend tests covering extraction, archive limits, isolated parsing, authorization, invitations/email codes, retrieval, grounding, and model/key routing. Frontend production build and TypeScript checks pass. CI repeats these checks without production credentials.
 
 `scripts/live_verify.py` and `scripts/cleanup_qa.py` support explicit integration testing on a dedicated project. Live checks create accounts/workspaces and may send email or consume API credit; they are not part of CI.
 

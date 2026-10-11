@@ -1,6 +1,7 @@
 """Independent Liquid embedding space, with full-text fallback on provider failure."""
 import asyncio
 import math
+import struct
 import time
 from functools import lru_cache
 from pathlib import Path
@@ -91,6 +92,11 @@ async def query_vectors(queries: list[str]):
     return output
 
 
+def storage_vector(vector):
+    # Nine significant digits round-trip float32 exactly, avoiding verbose float64 JSON.
+    return [float(format(struct.unpack("!f", struct.pack("!f", x))[0], ".9g")) for x in vector]
+
+
 async def index_chunks(db, chunks: list[dict], client=None):
     """Store segments separately, then atomically mark each complete source chunk."""
     pending, completed = [], []
@@ -105,7 +111,7 @@ async def index_chunks(db, chunks: list[dict], client=None):
         await db.insert("chunk_free_embeddings", [
             {"chunk_id": chunk["id"], "organization_id": chunk["organization_id"],
              "document_id": chunk["document_id"], "segment": ordinal,
-             "model": MODEL, "embedding": vector}
+             "model": MODEL, "embedding": storage_vector(vector)}
             for (chunk, ordinal, _), vector in zip(batch, vectors)
         ], upsert=True)
     await db.rpc("finish_liquid_index", {"indexed_chunks": completed})

@@ -90,3 +90,10 @@ async def test_new_upload_publishes_when_paid_embedding_is_exhausted(monkeypatch
     await worker.process(db, {"id": "job", "document_id": "document", "organization_id": "organization", "kind": "ingest", "attempts": 1})
     assert db.published and len(captured) == 1
     assert captured[0]["embedding"] is None
+
+
+def test_compact_storage_keeps_exact_float32_values():
+    import struct
+    original = [0.10000000014901, -0.0344679687733984, 1.0e-7, 0.123456789, 0.0]
+    converted = backup.storage_vector(original)
+    assert [struct.pack("!f", value) for value in converted] == [struct.pack("!f", value) for value in original]

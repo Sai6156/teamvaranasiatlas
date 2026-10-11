@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import httpx
+from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
 from .config import settings
 from .db import Database
@@ -175,7 +177,7 @@ async def process(db: Database, job: dict):
                 if settings().free_embedding_enabled:
                     try:
                         await index_chunks(db, stored)
-                    except ModelUnavailable:
+                    except (ModelUnavailable, HTTPException, httpx.HTTPError):
                         logger.warning("job=%s free embeddings pending; keyword search remains available", job["id"])
                 await db.update(
                     "documents",

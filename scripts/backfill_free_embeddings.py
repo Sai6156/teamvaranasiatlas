@@ -23,10 +23,15 @@ class BackfillDatabase(Database):
 
     async def request(self, method, path, **kwargs):
         headers = {**self.headers, **kwargs.pop("headers", {})}
-        response = await self.client.request(method, self.base + path, headers=headers, **kwargs)
-        if response.is_error:
-            raise RuntimeError(f"Database backfill request failed ({response.status_code})")
-        return response
+        for attempt in range(4):
+            response = await self.client.request(method, self.base + path, headers=headers, **kwargs)
+            if response.status_code in (429, 500, 502, 503, 504) and attempt < 3:
+                await asyncio.sleep(2 ** attempt)
+                continue
+            if response.is_error:
+                raise RuntimeError(f"Database backfill request failed ({response.status_code})")
+            return response
+
 
 
 async def main():
@@ -34,22 +39,15 @@ async def main():
         raise SystemExit("Enable FREE_EMBEDDING_ENABLED after accepting the provider data policy.")
     async with httpx.AsyncClient(timeout=90, transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0")) as client:
         db = BackfillDatabase(client)
-        documents = await db.select("documents", status="eq.ready", select="id", limit="1000")
-        if not documents:
-            return
         chunks, cursor = [], None
         while True:
-            filters = {"select": "id,organization_id,document_id,content", "free_embedding_ready": "eq.false",
-                       "document_id": "in.(" + ",".join(d["id"] for d in documents) + ")", "order": "id.asc", "limit": "1000"}
-            if cursor:
-                filters["id"] = "gt." + cursor
-            page = await db.select("chunks", **filters)
+            page = await db.rpc("pending_liquid_chunks", {"batch_limit": 1000, "after_id": cursor})
             chunks.extend(page)
             if len(page) < 1000:
                 break
             cursor = page[-1]["id"]
         print(json.dumps({"pending_chunks": len(chunks)}), flush=True)
-        gate, completed = asyncio.Semaphore(3), 0
+        gate, completed = asyncio.Semaphore(6), 0
 
         async def batch(rows):
             nonlocal completed
