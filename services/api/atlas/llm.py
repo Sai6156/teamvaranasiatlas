@@ -78,8 +78,8 @@ async def embed(texts: list[str]) -> list[list[float]]:
     config = settings()
     if paid_routes_blocked():
         raise BudgetUnavailable("Paid semantic search is temporarily unavailable.")
-    async with httpx.AsyncClient(timeout=40) as client:
-        for attempt in range(3):
+    async with httpx.AsyncClient(timeout=httpx.Timeout(8, connect=4)) as client:
+        for attempt in range(1):
             result = await client.post(
                 BASE + "/embeddings",
                 headers=headers(),
@@ -98,8 +98,7 @@ async def embed(texts: list[str]) -> list[list[float]]:
                     "The AI account key, spending limit or balance needs attention."
                 )
             if result.status_code in (429, 500, 502, 503, 504):
-                await asyncio.sleep(min(2**attempt, 4))
-                continue
+                raise ModelUnavailable("Paid semantic search is temporarily unavailable.")
             if result.is_error:
                 raise ModelUnavailable(
                     "Embedding service could not process this request."

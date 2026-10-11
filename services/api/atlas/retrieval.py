@@ -1,10 +1,13 @@
 """Focused hybrid retrieval: separate questions keep separate evidence budgets."""
 
 import asyncio
+import httpx
 import math
 import re
 from collections import Counter
-from .llm import embed
+from .llm import embed, ModelUnavailable
+from .config import settings
+from .embedding_backup import query_vectors
 
 STOP = set(
     "a an the of on in at to from for with and or is are was were be have has had what which who how when where why give provide list extract please show tell report company industries reliance financial year fy current previous reported following details exact total per as its their under according also".split()
@@ -129,13 +132,20 @@ async def retrieve(
     db, org: str, question: str, previous: str = "", folder: str | None = None
 ):
     queries = focused_queries(question, previous)
-    vectors = await embed(queries)
+    free_index = False
+    try:
+        vectors = await embed(queries)
+    except (ModelUnavailable, httpx.HTTPError):
+        if not settings().free_embedding_enabled:
+            raise
+        vectors = await query_vectors(queries)
+        free_index = True
     gate = asyncio.Semaphore(4)
 
     async def search(query, vector):
         async with gate:
             rows = await db.rpc(
-                "search_chunks_v2",
+                "search_chunks_liquid" if free_index else "search_chunks_v2",
                 {
                     "org": org,
                     "lexical_query": lexical_query(query),

@@ -4,7 +4,8 @@ from datetime import datetime, timedelta, timezone
 from .config import settings
 from .db import Database
 from .isolated_parser import prepare, ParserMemoryLimit
-from .llm import embed, ConfigurationError
+from .llm import embed, ConfigurationError, ModelUnavailable
+from .embedding_backup import index_chunks
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -149,10 +150,13 @@ async def process(db: Database, job: dict):
                     )
                     return
                 batch = chunks[start : start + 32]
-                vectors = await embed(
-                    [f"Document: {document['name']}\n{chunk.text}" for chunk in batch]
-                )
-                await db.insert(
+                vectors = None
+                try:
+                    vectors = await embed([f"Document: {document['name']}\n{chunk.text}" for chunk in batch])
+                except ModelUnavailable:
+                    if not settings().free_embedding_enabled:
+                        raise
+                stored = await db.insert(
                     "chunks",
                     [
                         {
@@ -161,13 +165,18 @@ async def process(db: Database, job: dict):
                             "ordinal": start + i,
                             "content": chunk.text,
                             "location": chunk.location,
-                            "embedding": vector,
+                            "embedding": vectors[i] if vectors is not None else None,
                             "embedding_model": settings().embedding_model,
                         }
-                        for i, (chunk, vector) in enumerate(zip(batch, vectors))
+                        for i, chunk in enumerate(batch)
                     ],
                     upsert=True,
                 )
+                if settings().free_embedding_enabled:
+                    try:
+                        await index_chunks(db, stored)
+                    except ModelUnavailable:
+                        logger.warning("job=%s free embeddings pending; keyword search remains available", job["id"])
                 await db.update(
                     "documents",
                     {"index_completed_chunks": min(start + 32, len(chunks))},

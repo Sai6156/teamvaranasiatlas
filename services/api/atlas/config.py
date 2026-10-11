@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimensions: int = 1536
+    free_embedding_enabled: bool = False
+    free_embedding_data_collection: str = "deny"
     openrouter_data_collection: str = "deny"
     openrouter_zdr: bool = False
     max_file_bytes: int = 25 * 1024 * 1024

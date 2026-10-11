@@ -98,3 +98,7 @@ Set `FRONTEND_URL` and `ALLOWED_ORIGINS` to the exact frontend origin. API liven
 | Free route fails | OpenRouter privacy policy, quotas, and provider capacity |
 | Demo list empty | Seed this Supabase project; see `demo-data/README.md` |
 | Original link expired | Request a fresh source link in Atlas |
+
+## Free embedding backup
+
+Apply the Liquid backup migration before enabling the feature. Set `FREE_EMBEDDING_ENABLED=true` and `FREE_EMBEDDING_DATA_COLLECTION=allow` only if the provider retention/training policy is acceptable for your data. Use the second OpenRouter key. Run `python scripts/backfill_free_embeddings.py` from the project root to prepare existing documents. Runtime background processing also retries incomplete backup indexing. The API maintains separate OpenAI and Liquid vector spaces and falls back to keyword retrieval if semantic inference is unavailable.

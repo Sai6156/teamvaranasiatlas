@@ -18,6 +18,10 @@ services:
         sync: false
       - key: OPENROUTER_FREE_API_KEY
         sync: false
+      - key: FREE_EMBEDDING_ENABLED
+        value: "false"
+      - key: FREE_EMBEDDING_DATA_COLLECTION
+        value: deny
       - key: BREVO_API_KEY
         sync: false
       - key: BREVO_SENDER_EMAIL
