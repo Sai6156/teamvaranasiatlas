@@ -8,7 +8,7 @@ npm run build
 npm run typecheck
 ```
 
-The current baseline has 57 passing backend tests covering extraction, archive limits, isolated parsing, authorization, invitations/email codes, retrieval, grounding, and model/key routing. Frontend production build and TypeScript checks pass. CI repeats these checks without production credentials.
+The current baseline has 53 passing backend tests covering extraction, archive limits, isolated parsing, authorization, invitations/email codes, retrieval, grounding, and model/key routing. Frontend production build and TypeScript checks pass. CI repeats these checks without production credentials.
 
 `scripts/live_verify.py` and `scripts/cleanup_qa.py` support explicit integration testing on a dedicated project. Live checks create accounts/workspaces and may send email or consume API credit; they are not part of CI.
 
@@ -30,4 +30,4 @@ Partial results involved rounding, citation alignment, reporting-basis ambiguity
 
 This sample is not a general accuracy benchmark. Important financial or policy decisions require source review. Deterministic arithmetic and stronger claim-to-passage verification remain development priorities.
 
-The free-embedding regressions cover long-input token limits/tail preservation, separate key and zero-price routing, wrong-dimension rejection, company-scoped Liquid search, and new uploads with an exhausted primary embedding key.
+Embedding requests use a dedicated server key, separate from paid and free chat. Tests verify that a chat-budget cooldown does not block embeddings and that an embedding-key failure does not affect chat routing.

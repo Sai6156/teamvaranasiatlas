@@ -36,18 +36,14 @@ Public demo preparation runs locally before publication so judges do not trigger
 7. Apply citation consistency and source-ID checks, handle abstention, and recheck cited-document access. The UI can replace streamed text after final checks.
 8. Save private conversation history and expose cited passages and access-checked temporary links to originals.
 
-Paid embedding failures can use a separate Liquid 1024-dimensional index through the dedicated free key. Longer passages use overlapping, tokenizer-bounded segments and preserve their original source references. OpenAI and Liquid vectors are never compared. New uploads can publish their keyword index even when semantic providers are unavailable. A background backfill retries missing Liquid embeddings.
+Paid embedding failures use the existing company-scoped keyword index for chat. New files still need embeddings before their semantic index can publish.
 
 ## Routing
 
-Paid answers prefer GLM 5.3 Flash, DeepSeek V4.1 Flash, GPT-6 Luna (OpenAI then Azure), and Qwen 3.8 Flash. Free fallbacks prefer Nemotron 3 Ultra and Apodex 1.1 Mini. Free routes use the dedicated key and enforce zero prompt/completion price. Embeddings use the primary key.
+Paid answers prefer GLM 5.3 Flash, DeepSeek V4.1 Flash, GPT-6 Luna (OpenAI then Azure), and Qwen 3.8 Flash. Free fallbacks prefer Nemotron 3 Ultra and Apodex 1.1 Mini. Free routes use the dedicated key and enforce zero prompt/completion price. OpenAI embeddings use the dedicated `OPENROUTER_EMBEDDING_API_KEY`. Embedding and chat budget cooldowns are independent.
 
 A 60-second paid-budget cooldown avoids repeated failing requests and permits recovery after a top-up. Partial output is never concatenated with another attempt. Authentication, privacy policies, free quotas, and provider availability still apply.
 
 ## Evidence limits
 
 Citation checks are consistency safeguards, not comprehensive factual-entailment verification. Correct source IDs can still accompany wrong interpretation or arithmetic. The release provides evidence inspection and abstention controls; `VERIFICATION.md` records known limitations.
-
-## Optional free embedding policy
-
-`FREE_EMBEDDING_ENABLED` enables Liquid LFM2.5-Embedding-350M. The free endpoint can retain inputs and embeddings for provider training. The default configuration disables it and denies data collection. Explicitly accepting that policy requires `FREE_EMBEDDING_DATA_COLLECTION=allow`. Free semantic retrieval uses `search_chunks_liquid`; regular retrieval uses the OpenAI vector column. Neither provider availability nor millisecond network response times are guaranteed.

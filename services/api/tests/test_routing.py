@@ -9,8 +9,9 @@ from atlas.config import Settings
 def configured(monkeypatch):
     llm._cooldown.clear()
     monkeypatch.setattr(llm, "_paid_blocked_until", 0.0)
+    monkeypatch.setattr(llm, "_embedding_blocked_until", 0.0)
     monkeypatch.setattr(
-        llm, "settings", lambda: Settings(openrouter_api_key="test-key", openrouter_free_api_key="free-test-key", _env_file=None)
+        llm, "settings", lambda: Settings(openrouter_api_key="test-key", openrouter_free_api_key="free-test-key", openrouter_embedding_api_key="embedding-test-key", _env_file=None)
     )
 
 
@@ -117,8 +118,7 @@ async def test_budget_failure_jumps_to_free_and_remembers_it(monkeypatch):
     calls.clear()
     _ = [e async for e in llm.generate([])]
     assert [b["model"] for b in calls] == [llm.FREE_ROUTES[0][0]]
-    with pytest.raises(llm.BudgetUnavailable):
-        await llm.embed(["query"])
+    assert llm.headers(embedding=True)["Authorization"] == "Bearer embedding-test-key"
     assert len(calls) == 1
 
 
@@ -139,12 +139,13 @@ async def test_free_priority_on_provider_failure(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_embedding_budget_error_opens_free_circuit(monkeypatch):
+async def test_embedding_budget_error_does_not_block_paid_chat(monkeypatch):
     original = httpx.AsyncClient
     monkeypatch.setattr(llm.httpx, "AsyncClient", lambda **kw: original(transport=httpx.MockTransport(lambda r: httpx.Response(402)), **kw))
     with pytest.raises(llm.BudgetUnavailable):
         await llm.embed(["query"])
-    assert llm.paid_routes_blocked()
+    assert llm._embedding_blocked_until > 0
+    assert not llm.paid_routes_blocked()
 
 
 @pytest.mark.asyncio
@@ -168,3 +169,23 @@ def test_separate_key_never_authorizes_paid_requests():
     assert llm.headers(llm.ROUTES[0][0])["Authorization"] == "Bearer test-key"
     for model, _ in llm.FREE_ROUTES:
         assert llm.headers(model)["Authorization"] == "Bearer free-test-key"
+
+
+def test_embedding_key_never_authorizes_chat_requests():
+    assert llm.headers(embedding=True)["Authorization"] == "Bearer embedding-test-key"
+    assert llm.headers(llm.ROUTES[0][0])["Authorization"] == "Bearer test-key"
+    assert llm.headers(llm.FREE_ROUTES[0][0])["Authorization"] == "Bearer free-test-key"
+
+
+@pytest.mark.asyncio
+async def test_chat_budget_cooldown_does_not_block_embeddings(monkeypatch):
+    llm.mark_budget_exhausted()
+    calls = []
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(200, json={"data": [{"index": 0, "embedding": [0.1] * 1536}]})
+    original = httpx.AsyncClient
+    monkeypatch.setattr(llm.httpx, "AsyncClient", lambda **kw: original(transport=httpx.MockTransport(handler), **kw))
+    vectors = await llm.embed(["Query"])
+    assert len(vectors[0]) == 1536
+    assert calls[0].headers["authorization"] == "Bearer embedding-test-key"

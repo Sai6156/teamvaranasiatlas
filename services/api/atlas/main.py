@@ -41,19 +41,14 @@ logger = logging.getLogger("atlas.api")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     task = None
-    backup_task = None
-    if settings().free_embedding_enabled:
-        from .embedding_backup import backfill_loop
-        backup_task = asyncio.create_task(backfill_loop(Database(privileged=True)))
     if settings().run_worker:
         from .worker import main as run_worker
 
         task = asyncio.create_task(run_worker())
     yield
-    tasks = [item for item in (task, backup_task) if item is not None]
-    for item in tasks:
-        item.cancel()
-    await asyncio.gather(*tasks, return_exceptions=True)
+    if task:
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
 
 
 app = FastAPI(

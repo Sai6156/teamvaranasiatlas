@@ -23,6 +23,7 @@ FREE_ROUTES = [
 BASE = "https://openrouter.ai/api/v1"
 _cooldown: dict[str, float] = {}
 _paid_blocked_until = 0.0
+_embedding_blocked_until = 0.0
 
 
 def paid_routes_blocked() -> bool:
@@ -47,17 +48,17 @@ class BudgetUnavailable(ConfigurationError):
     """Paid inference is blocked; free inference and keyword search may work."""
 
 
-def headers(model: str | None = None):
+def headers(model: str | None = None, *, embedding: bool = False):
     config = settings()
     is_free = bool(model and model.endswith(":free"))
-    key = config.openrouter_free_api_key if is_free else config.openrouter_api_key
+    key = config.openrouter_embedding_api_key if embedding else config.openrouter_free_api_key if is_free else config.openrouter_api_key
     if not key:
-        raise ConfigurationError("The free AI key has not been configured." if is_free else "The AI service has not been configured.")
+        raise ConfigurationError("The embedding key has not been configured." if embedding else "The free AI key has not been configured." if is_free else "The AI service has not been configured.")
     return {
         "Authorization": "Bearer " + key,
         "Content-Type": "application/json",
         "HTTP-Referer": config.frontend_url,
-        "X-OpenRouter-Title": "Atlas - Team Varanasi",
+        "X-OpenRouter-Title": "Atlas - Embeddings" if embedding else "Atlas - Team Varanasi",
     }
 
 
@@ -75,14 +76,15 @@ def provider_policy(providers: list[str]):
 
 
 async def embed(texts: list[str]) -> list[list[float]]:
+    global _embedding_blocked_until
     config = settings()
-    if paid_routes_blocked():
-        raise BudgetUnavailable("Paid semantic search is temporarily unavailable.")
-    async with httpx.AsyncClient(timeout=httpx.Timeout(8, connect=4)) as client:
-        for attempt in range(1):
+    if _embedding_blocked_until > time.monotonic():
+        raise BudgetUnavailable("Semantic search is temporarily unavailable.")
+    async with httpx.AsyncClient(timeout=40) as client:
+        for attempt in range(3):
             result = await client.post(
                 BASE + "/embeddings",
-                headers=headers(),
+                headers=headers(embedding=True),
                 json={
                     "model": config.embedding_model,
                     "input": texts,
@@ -91,14 +93,15 @@ async def embed(texts: list[str]) -> list[list[float]]:
                 },
             )
             if result.status_code == 402:
-                mark_budget_exhausted()
+                _embedding_blocked_until = time.monotonic() + 60
                 raise BudgetUnavailable("Paid semantic search is temporarily unavailable.")
             if result.status_code in (401, 403):
                 raise ConfigurationError(
                     "The AI account key, spending limit or balance needs attention."
                 )
             if result.status_code in (429, 500, 502, 503, 504):
-                raise ModelUnavailable("Paid semantic search is temporarily unavailable.")
+                await asyncio.sleep(min(2**attempt, 4))
+                continue
             if result.is_error:
                 raise ModelUnavailable(
                     "Embedding service could not process this request."

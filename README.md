@@ -34,7 +34,7 @@ Employees repeatedly ask managers and subject experts questions whose answers al
 | Frontend | Next.js, React, TypeScript, CSS |
 | API and ingestion | Python, FastAPI, Uvicorn, isolated parsing processes |
 | Identity and data | Supabase Auth, PostgreSQL, pgvector, RLS, private Storage |
-| Language and embeddings | OpenRouter with ordered routes and a dedicated free-model key |
+| Language and embeddings | OpenRouter with separate paid-chat, free-chat, and embedding keys |
 | Email | Brevo |
 | Hosting | Vercel frontend, Render API and worker |
 
